@@ -128,6 +128,48 @@ export async function registerRoutes(
     }
   });
 
+  // Brain - Instructions
+  app.get("/api/brain/instructions", async (_req, res) => {
+    const all = await brain.getAllInstructions();
+    res.json(all);
+  });
+
+  app.post("/api/brain/instructions", async (req, res) => {
+    try {
+      const input = z.object({
+        trigger: z.string().min(1),
+        instruction: z.string().min(1),
+        example: z.string().optional(),
+      }).parse(req.body);
+      const created = await brain.createInstruction(input);
+      res.status(201).json(created);
+    } catch (err) {
+      if (err instanceof z.ZodError) return res.status(400).json({ message: err.errors[0].message });
+      res.status(500).json({ message: "Internal error" });
+    }
+  });
+
+  app.patch("/api/brain/instructions/:id", async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const input = z.object({
+        trigger: z.string().optional(),
+        instruction: z.string().optional(),
+        example: z.string().optional(),
+        enabled: z.boolean().optional(),
+      }).parse(req.body);
+      const updated = await brain.updateInstruction(id, input);
+      res.json(updated);
+    } catch (err) {
+      res.status(500).json({ message: "Internal error" });
+    }
+  });
+
+  app.delete("/api/brain/instructions/:id", async (req, res) => {
+    await brain.deleteInstruction(Number(req.params.id));
+    res.json({ success: true });
+  });
+
   // Chat processing
   app.post(api.chat.process.path, async (req, res) => {
     try {
@@ -143,6 +185,17 @@ export async function registerRoutes(
       if (memories.length > 0) {
         memoryContext = "\n\nPrevious conversation summaries (for context continuity):\n" +
           memories.map((m, i) => `[Past ${i + 1}]: ${m.summary}`).join("\n");
+      }
+
+      // Get custom instructions from brain
+      const customInstructions = await brain.getEnabledInstructions();
+      let brainContext = "";
+      if (customInstructions.length > 0) {
+        brainContext = "\n\nCustom instructions from user (follow these when triggered):\n" +
+          customInstructions.map((inst) =>
+            `- When user says "${inst.trigger}": ${inst.instruction}${inst.example ? ` (example: "${inst.example}")` : ""}`
+          ).join("\n") +
+          "\n\nIMPORTANT: If the user asks you to 'nhớ' or 'học' or 'dạy' a new rule/instruction, you MUST extract the trigger phrase and the instruction, and return action LEARN with data { trigger, instruction, example? }.";
       }
 
       // Calculate today's stats simply by all orders for now
@@ -167,7 +220,8 @@ Available actions:
 4. COMPLETE_ORDER: If user wants to complete/chốt an order. Try to match the customer name or address. Return data: { ids: [order_id1, order_id2] }.
 5. UPDATE_ORDER: If user wants to update an order. Try to match the customer name or address. Return data: { id, updates: { items, totalAmount, address... } }. Ask for confirmation before updating if needed.
 6. REPORT: If user asks for a sales report.
-7. NONE: If no specific action, just converse naturally.
+7. LEARN: If user wants to teach you a new rule, instruction, or custom action. Return data: { trigger, instruction, example? }.
+8. NONE: If no specific action, just converse naturally.
 
 Return a JSON object with this structure:
 {

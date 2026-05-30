@@ -92,10 +92,10 @@ export default function Products() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">STT</th>
+                <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground pl-[6px] pr-[6px]">STT</th>
                 <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Tên mặt hàng</th>
                 <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Giá </th>
-                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground pl-[16px] pr-[16px] pt-[12px] pb-[12px] text-center">Thao tác</th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground text-center pl-[16px] pr-[16px] pt-[12px] pb-[12px]">Thao tác</th>
               </tr>
             </thead>
             <tbody>
