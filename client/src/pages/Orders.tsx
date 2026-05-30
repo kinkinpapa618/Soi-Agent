@@ -123,7 +123,6 @@ export default function Orders() {
           <p className="text-muted-foreground mt-1 text-sm">Quản lý và theo dõi trạng thái giao hàng</p>
         </div>
       </div>
-
       {/* Filter Pills */}
       <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
         <div className="flex items-center gap-2 p-1 bg-card rounded-2xl border border-border shadow-sm w-full">
@@ -131,12 +130,7 @@ export default function Orders() {
             <button
               key={f}
               onClick={() => setFilter(f as any)}
-              className={cn(
-                "flex-1 px-5 py-2 rounded-xl text-sm font-semibold transition-all duration-200",
-                filter === f 
-                  ? "bg-primary text-primary-foreground shadow-md" 
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              )}
+              className="flex-1 px-5 py-2 rounded-xl font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-secondary text-[13px]"
             >
               {f === "All" ? "Tất cả" : f === "Pending" ? "CHỜ GIAO" : "HOÀN THÀNH"}
             </button>
@@ -172,7 +166,6 @@ export default function Orders() {
           ) : null}
         </div>
       </div>
-
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -259,7 +252,7 @@ export default function Orders() {
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className="text-lg font-sans font-bold text-foreground flex items-center gap-2">
                                 <User className="w-4 h-4 text-muted-foreground" />
-                                <span className="font-sans">Tên Khách Hàng:</span> {order.customerName}
+                                {order.customerName}
                               </h3>
                               <span className={cn(
                                 "px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1",
@@ -417,7 +410,6 @@ export default function Orders() {
           })}
         </div>
       )}
-
       {/* Result Modal */}
       <AnimatePresence>
         {showResult && (

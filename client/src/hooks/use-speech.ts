@@ -12,6 +12,7 @@ export function useSpeech(onResult: (text: string) => void) {
   const [isListening, setIsListening] = useState(false);
   const [supported, setSupported] = useState(true);
   const recognitionRef = useRef<any>(null);
+  const finalTranscriptRef = useRef("");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -31,6 +32,7 @@ export function useSpeech(onResult: (text: string) => void) {
     
     recognition.onresult = (event: any) => {
       const text = event.results[0][0].transcript;
+      finalTranscriptRef.current = text;
       onResult(text);
     };
     
@@ -48,6 +50,7 @@ export function useSpeech(onResult: (text: string) => void) {
 
   const listen = useCallback(() => {
     if (recognitionRef.current && !isListening) {
+      finalTranscriptRef.current = "";
       try {
         recognitionRef.current.start();
       } catch (e) {
@@ -59,8 +62,11 @@ export function useSpeech(onResult: (text: string) => void) {
   const stop = useCallback(() => {
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
+      if (finalTranscriptRef.current) {
+        onResult(finalTranscriptRef.current);
+      }
     }
-  }, [isListening]);
+  }, [isListening, onResult]);
 
   const speak = useCallback((text: string) => {
     if (!("speechSynthesis" in window)) return;
