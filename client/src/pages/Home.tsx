@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX, Receipt, CheckCircle2, Package, Clock } from "lucide-react";
+import { Mic, Send, Bot, User, Volume2, VolumeX } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
-import { useOrders } from "@/hooks/use-orders";
-import { useProducts } from "@/hooks/use-products";
-import { formatCurrency, cn } from "@/lib/utils";
+
+import { cn } from "@/lib/utils";
 
 type Message = {
   id: string;
@@ -15,8 +14,6 @@ type Message = {
 };
 
 export default function Home() {
-  const { data: orders } = useOrders();
-  const { data: products } = useProducts();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "intro",
@@ -91,7 +88,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-full flex flex-col max-h-[calc(100vh-2rem)] md:max-h-[calc(100vh-4rem)]">
+    <div className="flex-1 flex flex-col min-h-0">
       {/* Header Area */}
       <div className="flex items-center justify-between mb-2">
         <div>
@@ -110,29 +107,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Dashboard Stats */}
-      <div className="grid grid-cols-4 gap-2 mb-2">
-        <div className="bg-orange-50 rounded-lg p-2 border border-orange-200 text-center">
-          <Receipt className="w-3 h-3 text-orange-500 mx-auto mb-1" />
-          <span className="text-lg font-bold text-orange-600">{orders?.filter(o => o.status === "Pending").length || 0}</span>
-          <p className="text-[10px] text-orange-600">Chưa giao</p>
-        </div>
-        <div className="bg-green-50 rounded-lg p-2 border border-green-200 text-center">
-          <CheckCircle2 className="w-3 h-3 text-green-500 mx-auto mb-1" />
-          <span className="text-lg font-bold text-green-600">{orders?.filter(o => o.status === "Complete").length || 0}</span>
-          <p className="text-[10px] text-green-600">Hoàn thành</p>
-        </div>
-        <div className="bg-blue-50 rounded-lg p-2 border border-blue-200 text-center">
-          <Package className="w-3 h-3 text-blue-500 mx-auto mb-1" />
-          <span className="text-lg font-bold text-blue-600">{products?.length || 0}</span>
-          <p className="text-[10px] text-blue-600">Mặt hàng</p>
-        </div>
-        <div className="bg-purple-50 rounded-lg p-2 border border-purple-200 text-center">
-          <Clock className="w-3 h-3 text-purple-500 mx-auto mb-1" />
-          <span className="text-lg font-bold text-purple-600">{formatCurrency(orders?.filter(o => o.status === "Complete").reduce((sum, o) => sum + o.totalAmount, 0) || 0)}</span>
-          <p className="text-[10px] text-purple-600">Doanh thu</p>
-        </div>
-      </div>
+      
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto pr-2 pb-2 space-y-2 min-h-0">
@@ -190,33 +165,9 @@ export default function Home() {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="flex items-end gap-2 relative shrink-0">
-        <div className="flex-1 bg-card border border-border rounded-3xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-2">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSend();
-              }
-            }}
-            placeholder="Hãy ra lệnh"
-            className="w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 text-foreground placeholder:text-muted-foreground"
-            rows={1}
-          />
-          <button
-            onClick={() => handleSend()}
-            disabled={!input.trim() || chatMutation.isPending}
-            className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 mb-0.5 mr-0.5"
-          >
-            <Send className="w-5 h-5 ml-1" />
-          </button>
-        </div>
-
-        {supported && (
-          <div className="flex flex-col-reverse items-center gap-2">
+      {supported && (
+        <div className="flex flex-col items-center gap-3 shrink-0 mt-auto">
+          <div className="flex flex-col items-center gap-2">
             <button
               onMouseDown={handleMouseDown}
               onMouseUp={handleMouseUp}
@@ -224,43 +175,46 @@ export default function Home() {
               onTouchStart={handleMouseDown}
               onTouchEnd={handleMouseUp}
               className={cn(
-                "flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 text-white shadow-lg",
+                "flex-shrink-0 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 text-white shadow-lg",
                 isListening 
                   ? "bg-accent animate-pulse-ring" 
                   : "bg-primary hover:bg-primary/90 hover:shadow-xl hover:-translate-y-1 active:translate-y-0"
               )}
             >
-              <Mic className={cn("w-6 h-6", isListening && "scale-110")} />
+              <Mic className={cn("w-7 h-7", isListening && "scale-110")} />
             </button>
-            <span className="text-xs text-muted-foreground whitespace-nowrap italic">
+            <span className="text-xs text-muted-foreground italic">
               {isListening ? "Đang nghe..." : "Bấm giữ để nói"}
             </span>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Input Area - Bottom */}
+      <div className="bg-card border border-border rounded-3xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-2 shrink-0 mt-auto mb-[15px]">
+        <textarea
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          }}
+          placeholder="Hãy ra lệnh..."
+          className="w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 text-foreground placeholder:text-muted-foreground"
+          rows={1}
+        />
+        <button
+          onClick={() => handleSend()}
+          disabled={!input.trim() || chatMutation.isPending}
+          className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 mb-0.5 mr-0.5"
+        >
+          <Send className="w-5 h-5 ml-1" />
+        </button>
       </div>
 
-      {/* Quick Commands */}
-      <div className="bg-orange-50 rounded-t-2xl p-2 border-t-2 border-orange-200 shrink-0">
-        <div className="grid grid-cols-3 gap-1">
-          {[
-            { label: "Tạo mặt hàng", cmd: "tạo mặt hàng" },
-            { label: "Lên đơn mới", cmd: "lên đơn" },
-            { label: "Chốt đơn", cmd: "chốt đơn" },
-            { label: "Xem đơn hàng", cmd: "hiển thị đơn hàng" },
-            { label: "Xem mặt hàng", cmd: "hiển thị mặt hàng" },
-            { label: "Báo cáo hôm nay", cmd: "báo cáo hôm nay" },
-          ].map((item) => (
-            <button
-              key={item.cmd}
-              onClick={() => handleSend(item.cmd)}
-              disabled={chatMutation.isPending}
-              className="px-2 py-1.5 rounded-lg bg-white hover:bg-orange-100 text-xs font-semibold text-orange-700 hover:text-orange-800 border border-orange-200 transition-colors disabled:opacity-50"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      
     </div>
   );
 }

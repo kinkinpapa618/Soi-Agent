@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Sparkles } from "lucide-react";
+import { MessageSquare, Package, Receipt, Sparkles, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -10,9 +11,10 @@ const NAV_ITEMS = [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col md:flex-row">
+    <div className="h-screen overflow-hidden bg-background flex flex-col md:flex-row">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl sticky top-0 h-screen p-6">
         <div className="flex items-center gap-3 px-2 mb-12">
@@ -66,42 +68,58 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 pb-24 md:pb-0 relative">
+      <main className="flex-1 flex flex-col min-w-0 relative h-full overflow-hidden">
         {/* Mobile Header */}
-        <header className="md:hidden flex items-center gap-3 p-4 bg-background/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-md">
-            <Sparkles className="w-5 h-5 text-white" />
+        <header className="md:hidden flex items-center justify-between p-4 bg-background/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-md">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex items-baseline gap-1">
+              <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>
+              <h1 className="font-display text-xl leading-none text-foreground">Agent</h1>
+            </div>
           </div>
-          <div className="flex items-baseline gap-1">
-            <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>
-            <h1 className="font-display text-xl leading-none text-foreground">Agent</h1>
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 rounded-xl hover:bg-secondary transition-colors"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg z-20 py-2">
+                  {NAV_ITEMS.map((item) => {
+                    const isActive = location === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className={cn(
+                          "flex items-center gap-3 px-4 py-3 text-sm transition-colors",
+                          isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+                        )}
+                      >
+                        <item.icon className="w-5 h-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </>
+            )}
           </div>
         </header>
 
-        <div className="flex-1 p-4 md:p-8 max-w-5xl mx-auto w-full">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-8 max-w-5xl mx-auto w-full">
           {children}
         </div>
       </main>
 
-      {/* Bottom Nav - Mobile */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-2 px-6 flex items-center justify-between z-50 pb-safe">
-        {NAV_ITEMS.map((item) => {
-          const isActive = location === item.href;
-          return (
-            <Link 
-              key={item.href} 
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-200",
-                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <item.icon className={cn("w-6 h-6", isActive && "fill-primary/20")} />
-              <span className="font-sans text-[10px] font-semibold">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      
     </div>
   );
 }
