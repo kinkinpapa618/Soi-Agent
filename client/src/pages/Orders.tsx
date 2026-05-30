@@ -250,7 +250,7 @@ export default function Orders() {
                           ) : (
                           <>
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-sans font-bold text-foreground flex items-center gap-2">
+                              <h3 className="text-lg font-sans font-bold text-foreground flex gap-2 justify-start items-center flex-row">
                                 <User className="w-4 h-4 text-muted-foreground" />
                                 {order.customerName}
                               </h3>
@@ -333,7 +333,6 @@ export default function Orders() {
                     </div>
                   )}
                 </div>
-
                 <AnimatePresence>
                   {isExpanded && !editingId && (
                     <motion.div
