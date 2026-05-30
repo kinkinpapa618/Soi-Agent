@@ -120,7 +120,6 @@ export default function Orders() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-3xl font-sans font-bold text-foreground">Đơn hàng</h2>
-          <p className="text-muted-foreground mt-1 text-sm">Quản lý và theo dõi trạng thái giao hàng</p>
         </div>
       </div>
       {/* Filter Pills */}
