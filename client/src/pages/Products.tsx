@@ -75,7 +75,6 @@ export default function Products() {
           <span>Thêm Mặt Hàng</span>
         </button>
       </div>
-
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -95,8 +94,8 @@ export default function Products() {
               <tr>
                 <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">STT</th>
                 <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Tên mặt hàng</th>
-                <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Giá bán</th>
-                <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Thao tác</th>
+                <th className="text-right px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">Giá </th>
+                <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground pl-[16px] pr-[16px] pt-[12px] pb-[12px] text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -179,7 +178,6 @@ export default function Products() {
           </table>
         </div>
       )}
-
       {/* Manual Create Modal */}
       {isDialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm">

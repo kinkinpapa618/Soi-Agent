@@ -2,6 +2,7 @@ import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { chatStorage } from "./replit_integrations/chat/storage";
+import { brain } from "./brain";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import OpenAI from "openai";
