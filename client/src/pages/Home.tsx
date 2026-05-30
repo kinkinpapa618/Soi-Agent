@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX, Package, Receipt, CheckCircle2, Clock } from "lucide-react";
+import { Mic, Send, Bot, User, Volume2, VolumeX, Receipt, CheckCircle2, Package, Clock } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
 import { useOrders } from "@/hooks/use-orders";

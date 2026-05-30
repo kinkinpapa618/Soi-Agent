@@ -32,3 +32,19 @@ export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 
+export const memory = pgTable("memory", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  summary: text("summary").notNull(),
+  keyInfo: text("key_info"),
+  createdAt: timestamp("created_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const insertMemorySchema = createInsertSchema(memory).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type Memory = typeof memory.$inferSelect;
+export type InsertMemory = z.infer<typeof insertMemorySchema>;
+

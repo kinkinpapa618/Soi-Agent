@@ -1,6 +1,6 @@
 import { db } from "../../db";
-import { conversations, messages } from "@shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { conversations, messages, memory } from "@shared/models/chat";
+import { eq, desc, asc } from "drizzle-orm";
 
 export interface IChatStorage {
   getConversation(id: number): Promise<typeof conversations.$inferSelect | undefined>;
@@ -9,6 +9,10 @@ export interface IChatStorage {
   deleteConversation(id: number): Promise<void>;
   getMessagesByConversation(conversationId: number): Promise<(typeof messages.$inferSelect)[]>;
   createMessage(conversationId: number, role: string, content: string): Promise<typeof messages.$inferSelect>;
+  getMemory(conversationId: number): Promise<typeof memory.$inferSelect | undefined>;
+  setMemory(conversationId: number, summary: string, keyInfo?: string): Promise<typeof memory.$inferSelect>;
+  getRecentMemories(limit: number): Promise<(typeof memory.$inferSelect)[]>;
+  getAllMemories(): Promise<(typeof memory.$inferSelect)[]>;
 }
 
 export const chatStorage: IChatStorage = {
@@ -38,6 +42,30 @@ export const chatStorage: IChatStorage = {
   async createMessage(conversationId: number, role: string, content: string) {
     const [message] = await db.insert(messages).values({ conversationId, role, content }).returning();
     return message;
+  },
+
+  async getMemory(conversationId: number) {
+    const [mem] = await db.select().from(memory).where(eq(memory.conversationId, conversationId));
+    return mem;
+  },
+
+  async setMemory(conversationId: number, summary: string, keyInfo?: string) {
+    const existing = await this.getMemory(conversationId);
+    if (existing) {
+      const [updated] = await db.update(memory).set({ summary, keyInfo, createdAt: new Date() })
+        .where(eq(memory.conversationId, conversationId)).returning();
+      return updated;
+    }
+    const [mem] = await db.insert(memory).values({ conversationId, summary, keyInfo }).returning();
+    return mem;
+  },
+
+  async getRecentMemories(limit: number) {
+    return db.select().from(memory).orderBy(desc(memory.createdAt)).limit(limit);
+  },
+
+  async getAllMemories() {
+    return db.select().from(memory).orderBy(desc(memory.createdAt));
   },
 };
 

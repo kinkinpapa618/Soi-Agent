@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
+import { chatStorage } from "./replit_integrations/chat/storage";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import OpenAI from "openai";
@@ -130,24 +131,32 @@ export async function registerRoutes(
   app.post(api.chat.process.path, async (req, res) => {
     try {
       const { message } = api.chat.process.input.parse(req.body);
-      
+
       const products = await storage.getProducts();
       const pendingOrders = await storage.getPendingOrders();
       const allOrders = await storage.getOrders();
-      
+
+      // Get recent memories (last 10 conversations)
+      const memories = await chatStorage.getRecentMemories(10);
+      let memoryContext = "";
+      if (memories.length > 0) {
+        memoryContext = "\n\nPrevious conversation summaries (for context continuity):\n" +
+          memories.map((m, i) => `[Past ${i + 1}]: ${m.summary}`).join("\n");
+      }
+
       // Calculate today's stats simply by all orders for now
       const todayTotalOrders = allOrders.length;
       const todayCompletedOrders = allOrders.filter(o => o.status === 'Complete');
       const todayRevenue = todayCompletedOrders.reduce((acc, o) => acc + o.totalAmount, 0);
 
-      const systemPrompt = `You are an AI assistant managing an order system via voice/text. 
-You extract user intentions and format them as JSON.
+      const systemPrompt = `You are an AI assistant managing an order system via voice/text.
+You extract user intentions and format them as JSON.${memoryContext}
 Current Context:
 Products in DB: ${JSON.stringify(products)}
 Pending Orders: ${JSON.stringify(pendingOrders)}
 Today's Stats: Total Orders: ${todayTotalOrders}, Completed: ${todayCompletedOrders.length}, Revenue: ${todayRevenue}k
 
-Based on the user's message, determine the action to take. 
+Based on the user's message, determine the action to take.
 Always reply in Vietnamese.
 Your name is 'Trợ Lý AI' or 'SÓI int'.
 Available actions:
@@ -186,7 +195,7 @@ All prices are typically referred to as 'k' (e.g., 45k = 45000). Convert interna
       }
 
       const parsedResponse = JSON.parse(content);
-      
+
       // Auto-execute server-side actions if appropriate, or let frontend handle it
       if (parsedResponse.action === 'CREATE_PRODUCT' && parsedResponse.data?.name && parsedResponse.data?.price) {
         await storage.createProduct({
