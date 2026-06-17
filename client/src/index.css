@@ -120,3 +120,12 @@
 .animate-pulse-ring {
   animation: pulse-ring 2s infinite;
 }
+
+/* Ẩn thanh cuộn toàn bộ ứng dụng */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
