@@ -116,7 +116,7 @@ export default function Orders() {
   const totalAmount = completedList.reduce((sum, o) => sum + o.totalAmount, 0);
 
   return (
-    <div className="h-full">
+    <div className="h-full overflow-y-auto pb-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-3xl font-sans font-bold text-foreground">Đơn hàng</h2>
