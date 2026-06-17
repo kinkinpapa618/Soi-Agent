@@ -129,9 +129,9 @@ export default function Orders() {
             <button
               key={f}
               onClick={() => setFilter(f as any)}
-              className="flex-1 px-5 py-2 rounded-xl font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-secondary text-[13px]"
+              className="flex-1 px-5 py-2 rounded-xl font-semibold transition-all duration-200 text-muted-foreground hover:text-foreground hover:bg-secondary text-[13px] whitespace-nowrap"
             >
-              {f === "All" ? "Tất cả" : f === "Pending" ? "CHỜ GIAO" : "HOÀN THÀNH"}
+              {f === "All" ? "TẤT CẢ" : f === "Pending" ? "CHỜ GIAO" : "HOÀN THÀNH"}
             </button>
           ))}
         </div>
