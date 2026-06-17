@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Sparkles, Menu } from "lucide-react";
+import { MessageSquare, Package, Receipt, Sparkles, Menu, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "Trợ Lý AI", icon: MessageSquare },
   { href: "/orders", label: "Đơn hàng", icon: Receipt },
   { href: "/products", label: "Mặt hàng", icon: Package },
+  { href: "/reports", label: "Báo cáo", icon: BarChart3 },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

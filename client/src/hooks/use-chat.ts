@@ -5,11 +5,11 @@ export function useProcessChat() {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (message: string) => {
+    mutationFn: async ({ message, model, history }: { message: string; model?: string; history?: { role: string; content: string }[] }) => {
       const res = await fetch(api.chat.process.path, {
         method: api.chat.process.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, model, history }),
         credentials: "include",
       });
       
@@ -17,7 +17,6 @@ export function useProcessChat() {
       return api.chat.process.responses[200].parse(await res.json());
     },
     onSuccess: (data) => {
-      // Invalidate relevant queries based on the action returned by the LLM
       if (data.action) {
         if (data.action.includes("PRODUCT")) {
           queryClient.invalidateQueries({ queryKey: [api.products.list.path] });

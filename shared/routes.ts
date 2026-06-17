@@ -106,7 +106,12 @@ export const api = {
       method: 'POST' as const,
       path: '/api/chat/process' as const,
       input: z.object({
-        message: z.string()
+        message: z.string(),
+        model: z.string().optional(),
+        history: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string(),
+        })).optional(),
       }),
       responses: {
         200: z.object({
@@ -116,6 +121,24 @@ export const api = {
         })
       }
     }
+  },
+  brain: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/brain/instructions' as const,
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/brain/instructions' as const,
+    },
+    update: {
+      method: 'PATCH' as const,
+      path: '/api/brain/instructions/:id' as const,
+    },
+    delete: {
+      method: 'DELETE' as const,
+      path: '/api/brain/instructions/:id' as const,
+    },
   }
 };
 

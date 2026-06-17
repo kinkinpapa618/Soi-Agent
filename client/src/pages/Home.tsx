@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX } from "lucide-react";
+import { Mic, Send, Bot, User, Volume2, VolumeX, ChevronDown } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
 
@@ -13,17 +13,33 @@ type Message = {
   timestamp: Date;
 };
 
+const STORAGE_KEY = "soi_chat_messages";
+
+function loadMessages(): Message[] {
+  try {
+    const saved = sessionStorage.getItem(STORAGE_KEY);
+    if (saved) return JSON.parse(saved, (k, v) => k === "timestamp" ? new Date(v) : v);
+  } catch {}
+  return [{
+    id: "intro",
+    role: "assistant" as const,
+    content: "Xin chào! Tôi là SÓI Agent. Bạn có thể ra lệnh bằng giọng nói hoặc gõ phím để tạo mặt hàng, lên đơn, chốt đơn hoặc xem báo cáo.",
+    timestamp: new Date()
+  }];
+}
+
 export default function Home() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "intro",
-      role: "assistant",
-      content: "Xin chào! Tôi là SÓI Agent. Bạn có thể ra lệnh bằng giọng nói hoặc gõ phím để tạo mặt hàng, lên đơn, chốt đơn hoặc xem báo cáo.",
-      timestamp: new Date()
-    }
-  ]);
+  const [messages, setMessages] = useState<Message[]>(loadMessages);
+  const prevMessagesRef = useRef(messages);
+
+  useEffect(() => {
+    prevMessagesRef.current = messages;
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+  }, [messages]);
   const [input, setInput] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(true);
+  const [modelOpen, setModelOpen] = useState(false);
+  const [currentModel, setCurrentModel] = useState("gpt-5.2");
   const chatEndRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = useProcessChat();
@@ -60,7 +76,7 @@ export default function Home() {
     setMessages(prev => [...prev, userMsg]);
     setInput("");
 
-    chatMutation.mutate(textToSend, {
+    chatMutation.mutate({ message: textToSend, model: currentModel, history: messages.map(m => ({ role: m.role, content: m.content })) }, {
       onSuccess: (data) => {
         const aiMsg: Message = {
           id: (Date.now() + 1).toString(),
@@ -85,16 +101,46 @@ export default function Home() {
           <h2 className="text-3xl font-sans font-bold text-foreground"></h2>
           <p className="text-muted-foreground mt-1 text-sm"></p>
         </div>
-        <button
-          onClick={() => setAutoSpeak(!autoSpeak)}
-          className={cn(
-            "p-3 rounded-full transition-all duration-300",
-            autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-          )}
-          title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
-        >
-          {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <button
+              onClick={() => setModelOpen(!modelOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-medium text-foreground transition-colors"
+            >
+              {currentModel}
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {modelOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setModelOpen(false)} />
+                <div className="absolute right-0 top-full mt-1 w-44 bg-card border border-border rounded-lg shadow-lg z-20 py-1">
+                  {["gpt-5.2", "gpt-5.1", "gpt-4o", "gpt-4o-mini", "o3", "gemma-2-2b-it"].map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => { setCurrentModel(m); setModelOpen(false); }}
+                      className={cn(
+                        "w-full text-left px-3 py-2 text-xs transition-colors",
+                        currentModel === m ? "text-primary font-semibold" : "text-foreground hover:bg-secondary"
+                      )}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setAutoSpeak(!autoSpeak)}
+            className={cn(
+              "p-3 rounded-full transition-all duration-300",
+              autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+            )}
+            title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
+          >
+            {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       
