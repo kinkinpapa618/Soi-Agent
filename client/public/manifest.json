@@ -1,0 +1,26 @@
+{
+  "name": "SÓI Agent - Quản lý đơn hàng",
+  "short_name": "SÓI Agent",
+  "description": "Ứng dụng quản lý đơn hàng bằng giọng nói và AI",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f172a",
+  "lang": "vi",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

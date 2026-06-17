@@ -1,0 +1,19 @@
+uploads = []
+
+[[generated]]
+id = "sovXMjgH43cAYhylv0-Nu"
+uri = "file://client/public/icon-512.png"
+type = "image"
+title = "soi-agent-wolf-voice-icon"
+
+[[generated]]
+id = "v5H_JBoeVq8qoCnWSNB5x"
+uri = "file://client/public/icon-192.png"
+type = "image"
+title = "soi-agent-icon-192"
+
+[[outputs]]
+id = "VSO9GbdQpQYdsRCpQQQRS"
+uri = "file://client/public/icon-512.png"
+type = "image"
+title = "Logo SÓI Agent"
