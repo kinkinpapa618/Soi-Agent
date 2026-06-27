@@ -6,7 +6,7 @@ import {
   type InsertOrder,
   type Order
 } from "@shared/schema";
-import { eq, inArray, and } from "drizzle-orm";
+import { eq, inArray, and, gte, lte } from "drizzle-orm";
 import { startOfDay, endOfDay } from "date-fns";
 
 export interface IStorage {
@@ -62,12 +62,12 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getOrdersByDateRange(startDate: Date, endDate: Date) {
-    return await db.select().from(orders).where(
-      and(
-        // we use a simple approach for now, assuming dates are passed correctly
-        // in a real app we'd use a raw SQL expression or proper date functions for filtering
-      )
-    );
+    const start = startOfDay(startDate);
+    const end = endOfDay(endDate);
+    return await db
+      .select()
+      .from(orders)
+      .where(and(gte(orders.createdAt, start), lte(orders.createdAt, end)));
   }
 
   async createOrder(order: InsertOrder) {
