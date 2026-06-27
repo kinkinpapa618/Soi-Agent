@@ -12,7 +12,14 @@ export function createAIClients(): Models {
     baseURL: "https://integrate.api.nvidia.com/v1",
   });
 
+  // GLM provider client (use a separate env var for the key and optional base URL)
+  const glmClient = new OpenAI({
+    apiKey: process.env.AI_INTEGRATIONS_GLM_API_KEY || process.env.GLM_API_KEY || "",
+    baseURL: process.env.AI_INTEGRATIONS_GLM_BASE_URL || undefined,
+  });
+
   return {
+    "glm-4.7-flash": { client: glmClient, model: "glm-4.7-flash" },
     "gpt-5.2": { client: openai, model: "gpt-5.2" },
     "gpt-5.1": { client: openai, model: "gpt-5.1" },
     "gpt-4o": { client: openai, model: "gpt-4o" },
