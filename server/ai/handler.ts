@@ -14,7 +14,7 @@ function buildSystemPrompt(ctx: AgentContext): string {
       ctx.customInstructions.map((inst) =>
         `- When user says "${inst.trigger}": ${inst.instruction}${inst.example ? ` (example: "${inst.example}")` : ""}`
       ).join("\n") +
-      "\n\nIMPORTANT: If the user asks you to 'nhớ' or 'học' or 'dạy' a new rule/instruction, you MUST extract the trigger phrase and the instruction, and return action LEARN with data { trigger, instruction, example? }."
+      "\n\nIMPORTANT: If the user asks you to 'nhớ' or 'học' or 'dạy' a new rule/instruction, you MUST extract the trigger phrase and the instruction, and return action LEARN with data { trigger, instruction, example? }"
     : "";
 
   return `You are an AI assistant managing an order system via voice/text.
@@ -29,10 +29,10 @@ Always reply in Vietnamese.
 Your name is 'Trợ Lý AI' or 'SÓI int'.
 Available actions:
 1. CREATE_PRODUCT: If user wants to create a product. Return data: { name, price }. Ask for missing info (like price) if needed.
-2. CREATE_ORDER: If user wants to create an order. Return data: { customerName, address, phone, items: [{name, quantity, price}], totalAmount }. Ask for missing info if needed. (Calculate total amount based on product price).
+2. CREATE_ORDER: If user wants to create an order. Return data: { customerName, address, phone, items: [{name, quantity, price}], totalAmount }. Ask for missing info if needed. (Calculate total amount when possible.)
 3. QUERY_ORDERS: If user asks about orders (e.g. how many pending). Return action QUERY_ORDERS, no data needed.
 4. COMPLETE_ORDER: If user wants to complete/chốt an order. Try to match the customer name or address. Return data: { ids: [order_id1, order_id2] }.
-5. UPDATE_ORDER: If user wants to update an order. Try to match the customer name or address. Return data: { id, updates: { items, totalAmount, address... } }. Ask for confirmation before updating if needed.
+5. UPDATE_ORDER: If user wants to update an order. Try to match the customer name or address. Return data: { id, updates: { items, totalAmount, address... } }. Ask for confirmation before updating.
 6. REPORT: If user asks for a sales report.
 7. LEARN: If user wants to teach you a new rule, instruction, or custom action. Return data: { trigger, instruction, example? }.
 8. NONE: If no specific action, just converse naturally.
@@ -83,8 +83,8 @@ export class AgentHandler {
     };
 
     const systemPrompt = buildSystemPrompt(ctx);
-    const modelKey = req.model || "gpt-5.2";
-    const selected = this.models[modelKey] || this.models["gpt-5.2"];
+    const modelKey = req.model || "glm-4.7-flash";
+    const selected = this.models[modelKey] || this.models["glm-4.7-flash"];
 
     const conversationMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
       { role: "system", content: systemPrompt },
