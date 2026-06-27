@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import type { Server } from "http";
+import fs from "fs";
+import path from "path";
 import { storage } from "./storage";
 import { chatStorage } from "./replit_integrations/chat/storage";
 import { brain } from "./brain";
@@ -128,7 +130,16 @@ export async function registerRoutes(
 
   // Download AI module
   app.get("/api/ai/module", async (_req, res) => {
-    res.download("/home/runner/workspace/soi-agent-module.tar.gz", "soi-agent-module.tar.gz");
+    try {
+      const modulePath = path.join(process.cwd(), "soi-agent-module.tar.gz");
+      if (!fs.existsSync(modulePath)) {
+        return res.status(404).json({ message: "Module not found" });
+      }
+      return res.download(modulePath, "soi-agent-module.tar.gz");
+    } catch (err) {
+      console.error("Error serving AI module:", err);
+      return res.status(500).json({ message: "Failed to download module" });
+    }
   });
 
   return httpServer;
