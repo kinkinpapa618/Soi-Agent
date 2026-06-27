@@ -3,6 +3,14 @@ import type { IStorage } from "../storage";
 import type { IChatStorage } from "../replit_integrations/chat/storage";
 import type { IBrain } from "./brain";
 
+function summarizeArray<T>(arr: T[], limit = 10) {
+  try {
+    return arr.slice(0, limit);
+  } catch (e) {
+    return [] as T[];
+  }
+}
+
 function buildSystemPrompt(ctx: AgentContext): string {
   const memoryContext = ctx.memories.length > 0
     ? "\n\nPrevious conversation summaries (for context continuity):\n" +
@@ -17,11 +25,14 @@ function buildSystemPrompt(ctx: AgentContext): string {
       "\n\nIMPORTANT: If the user asks you to 'nhớ' or 'học' or 'dạy' a new rule/instruction, you MUST extract the trigger phrase and the instruction, and return action LEARN with data { trigger, instruction, example? }"
     : "";
 
+  const productsSummary = summarizeArray(ctx.products as unknown[], 10);
+  const pendingSummary = summarizeArray(ctx.pendingOrders as unknown[], 10);
+
   return `You are an AI assistant managing an order system via voice/text.
 You extract user intentions and format them as JSON.${memoryContext}${brainContext}
 Current Context:
-Products in DB: ${JSON.stringify(ctx.products)}
-Pending Orders: ${JSON.stringify(ctx.pendingOrders)}
+Products in DB (showing up to 10): ${JSON.stringify(productsSummary)}
+Pending Orders (showing up to 10): ${JSON.stringify(pendingSummary)}
 Today's Stats: Total Orders: ${ctx.todayStats.totalOrders}, Completed: ${ctx.todayStats.completedOrders}, Revenue: ${ctx.todayStats.revenue}k
 
 Based on the user's message, determine the action to take.
@@ -32,7 +43,7 @@ Available actions:
 2. CREATE_ORDER: If user wants to create an order. Return data: { customerName, address, phone, items: [{name, quantity, price}], totalAmount }. Ask for missing info if needed. (Calculate total amount when possible.)
 3. QUERY_ORDERS: If user asks about orders (e.g. how many pending). Return action QUERY_ORDERS, no data needed.
 4. COMPLETE_ORDER: If user wants to complete/chốt an order. Try to match the customer name or address. Return data: { ids: [order_id1, order_id2] }.
-5. UPDATE_ORDER: If user wants to update an order. Try to match the customer name or address. Return data: { id, updates: { items, totalAmount, address... } }. Ask for confirmation before updating.
+5. UPDATE_ORDER: If user wants to update an order. Try to match the customer name or address. Return data: { id, updates: { items, totalAmount, address... } }.
 6. REPORT: If user asks for a sales report.
 7. LEARN: If user wants to teach you a new rule, instruction, or custom action. Return data: { trigger, instruction, example? }.
 8. NONE: If no specific action, just converse naturally.
@@ -98,16 +109,31 @@ export class AgentHandler {
 
     conversationMessages.push({ role: "user", content: req.message });
 
+    // call model
     const response = await selected.client.chat.completions.create({
       model: selected.model,
       messages: conversationMessages,
       response_format: { type: "json_object" },
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) throw new Error("No response from AI");
+    const content = response.choices?.[0]?.message?.content ?? "";
+    if (!content) {
+      return { reply: "AI không trả về nội dung hợp lệ", action: "NONE", data: null } as ChatResponse;
+    }
 
-    const parsed = JSON.parse(content) as ChatResponse;
+    let parsed: ChatResponse;
+    try {
+      parsed = JSON.parse(content) as ChatResponse;
+    } catch (err) {
+      console.error("AI response parse error:", err, "raw:", content);
+      return { reply: "AI trả về định dạng không đúng. Vui lòng thử lại.", action: "NONE", data: null } as ChatResponse;
+    }
+
+    // basic validation
+    if (typeof parsed.reply !== "string" || typeof parsed.action !== "string") {
+      console.error("AI returned invalid structure:", parsed);
+      return { reply: "AI trả về dữ liệu không hợp lệ", action: "NONE", data: null } as ChatResponse;
+    }
 
     await this.executeAction(parsed);
 
@@ -120,41 +146,51 @@ export class AgentHandler {
 
     switch (parsed.action) {
       case "CREATE_PRODUCT": {
-        if (data.name && data.price) {
-          await this.storage.createProduct({
-            name: String(data.name),
-            price: Number(data.price),
-          });
+        const name = data.name ? String(data.name) : null;
+        const price = data.price ? Number(data.price) : NaN;
+        if (!name || Number.isNaN(price)) {
+          console.warn("CREATE_PRODUCT missing or invalid fields", data);
+          return;
         }
+        await this.storage.createProduct({ name, price });
         break;
       }
       case "CREATE_ORDER": {
-        if (data.customerName) {
-          await this.storage.createOrder({
-            customerName: String(data.customerName),
-            address: String(data.address || "Unknown"),
-            phone: String(data.phone || "Unknown"),
-            totalAmount: Number(data.totalAmount || 0),
-            items: (data.items || []) as [],
-            status: "Pending",
-          });
+        const customerName = data.customerName ? String(data.customerName) : null;
+        if (!customerName) {
+          console.warn("CREATE_ORDER missing customerName", data);
+          return;
         }
+        await this.storage.createOrder({
+          customerName,
+          address: String(data.address || "Unknown"),
+          phone: String(data.phone || "Unknown"),
+          totalAmount: Number(data.totalAmount || 0),
+          items: (data.items || []) as [],
+          status: "Pending",
+        });
         break;
       }
       case "COMPLETE_ORDER": {
-        const ids = data.ids as number[] | undefined;
-        if (ids && ids.length > 0) {
-          await this.storage.completeOrders(ids);
+        const ids = Array.isArray((data as any).ids) ? (data as any).ids.map(Number) : [];
+        if (ids.length === 0) {
+          console.warn("COMPLETE_ORDER missing ids", data);
+          return;
         }
+        await this.storage.completeOrders(ids);
         break;
       }
       case "UPDATE_ORDER": {
-        if (data.id && data.updates) {
-          await this.storage.updateOrder(Number(data.id), {
-            ...(data.updates as Record<string, unknown>),
-            status: "Updated - Pending",
-          });
+        const id = data.id ? Number(data.id) : NaN;
+        const updates = data.updates as Record<string, unknown> | undefined;
+        if (Number.isNaN(id) || !updates) {
+          console.warn("UPDATE_ORDER invalid payload", data);
+          return;
         }
+        await this.storage.updateOrder(id, {
+          ...(updates as Record<string, unknown>),
+          status: "Updated - Pending",
+        });
         break;
       }
       case "LEARN": {
@@ -164,8 +200,13 @@ export class AgentHandler {
             instruction: String(data.instruction),
             example: data.example ? String(data.example) : null,
           });
-          parsed.reply = `Đã ghi nhớ: "${data.trigger}" - ${data.instruction}`;
+          // mutate reply to confirm
+          parsed.reply = `Đã ghi nhớ: "${String(data.trigger)}" - ${String(data.instruction)}`;
         }
+        break;
+      }
+      default: {
+        // no-op for other actions (QUERY_ORDERS, REPORT, NONE, etc.)
         break;
       }
     }
