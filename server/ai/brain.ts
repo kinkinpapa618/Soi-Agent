@@ -13,19 +13,23 @@ export interface IBrain {
 
 export class Brain implements IBrain {
   async getAllInstructions() {
+    if (!db) return [];
     return db.select().from(instructions).orderBy(desc(instructions.createdAt));
   }
 
   async getEnabledInstructions() {
+    if (!db) return [];
     return db.select().from(instructions).where(eq(instructions.enabled, true)).orderBy(desc(instructions.createdAt));
   }
 
   async createInstruction(input: InsertInstruction) {
+    if (!db) throw new Error("Database not configured");
     const [created] = await db.insert(instructions).values(input).returning();
     return created;
   }
 
   async updateInstruction(id: number, input: Partial<InsertInstruction>) {
+    if (!db) throw new Error("Database not configured");
     const [updated] = await db.update(instructions)
       .set({ ...input, updatedAt: sql`CURRENT_TIMESTAMP` })
       .where(eq(instructions.id, id))
@@ -34,6 +38,7 @@ export class Brain implements IBrain {
   }
 
   async deleteInstruction(id: number) {
+    if (!db) throw new Error("Database not configured");
     await db.delete(instructions).where(eq(instructions.id, id));
   }
 

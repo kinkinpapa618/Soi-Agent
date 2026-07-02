@@ -5,11 +5,13 @@ import * as brainSchema from "@shared/models/brain";
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+function getDb() {
+  if (!process.env.DATABASE_URL) {
+    console.error("DATABASE_URL not set - database features disabled");
+    return null;
+  }
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  return drizzle(pool, { schema: { ...schema, ...brainSchema } });
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema: { ...schema, ...brainSchema } });
+export const db = getDb();
