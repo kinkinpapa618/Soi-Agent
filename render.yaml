@@ -5,8 +5,8 @@ services:
     repo: https://github.com/kinkinpapa618/Soi-Agent.git
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build && npm run db:push
-    startCommand: npm start
+    buildCommand: npm install && npm run build
+    startCommand: node startup.cjs
     healthCheckPath: /api/products
     envVarGroups:
       - name: soi-agent

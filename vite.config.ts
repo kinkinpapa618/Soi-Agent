@@ -4,23 +4,35 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const isDev = process.env.NODE_ENV !== "production";
 
-const plugins = [react()];
+async function getPlugins() {
+  const plugins = [react()];
 
-if (isDev) {
-  const runtimeErrorOverlay = (await import("@replit/vite-plugin-runtime-error-modal")).default;
-  plugins.push(runtimeErrorOverlay());
+  const isDev = process.env.NODE_ENV !== "production" || process.env.REPL_ID !== undefined;
 
-  if (process.env.REPL_ID !== undefined) {
-    const cartographer = (await import("@replit/vite-plugin-cartographer")).cartographer;
-    const devBanner = (await import("@replit/vite-plugin-dev-banner")).devBanner;
-    plugins.push(cartographer(), devBanner());
+  if (isDev) {
+    try {
+      const mod = await import("@replit/vite-plugin-runtime-error-modal");
+      if (mod.default) plugins.push(mod.default());
+    } catch {}
+
+    if (process.env.REPL_ID !== undefined) {
+      try {
+        const cartographer = await import("@replit/vite-plugin-cartographer");
+        if (cartographer.cartographer) plugins.push(cartographer.cartographer());
+      } catch {}
+      try {
+        const devBanner = await import("@replit/vite-plugin-dev-banner");
+        if (devBanner.devBanner) plugins.push(devBanner.devBanner());
+      } catch {}
+    }
   }
+
+  return plugins;
 }
 
-export default defineConfig({
-  plugins,
+export default defineConfig(async () => ({
+  plugins: await getPlugins(),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -39,4 +51,4 @@ export default defineConfig({
       deny: ["**/.*"],
     },
   },
-});
+}));
