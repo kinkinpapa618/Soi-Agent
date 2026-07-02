@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX, ChevronDown } from "lucide-react";
+import { Mic, Send, Bot, User, Volume2, VolumeX } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
 
@@ -38,8 +38,7 @@ export default function Home() {
   }, [messages]);
   const [input, setInput] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(true);
-  const [modelOpen, setModelOpen] = useState(false);
-  const [currentModel, setCurrentModel] = useState("gpt-5.2");
+  const currentModel = "gpt-5.2";
   const chatEndRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = useProcessChat();
@@ -88,51 +87,24 @@ export default function Home() {
   return (
     <div className="flex-1 flex flex-col min-h-0">
       {/* Header Area */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h2 className="text-3xl font-sans font-bold text-foreground"></h2>
-          <p className="text-muted-foreground mt-1 text-sm"></p>
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-sky-500/20 flex-shrink-0">
+          <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <button
-              onClick={() => setModelOpen(!modelOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary hover:bg-secondary/80 text-xs font-medium text-foreground transition-colors"
-            >
-              {currentModel}
-              <ChevronDown className="w-3 h-3" />
-            </button>
-            {modelOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setModelOpen(false)} />
-                <div className="absolute right-0 top-full mt-1 w-44 bg-card border border-border rounded-lg shadow-lg z-20 py-1">
-                  {["gpt-5.2", "gpt-5.1", "gpt-4o", "gpt-4o-mini", "o3", "gemma-2-2b-it"].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => { setCurrentModel(m); setModelOpen(false); }}
-                      className={cn(
-                        "w-full text-left px-3 py-2 text-xs transition-colors",
-                        currentModel === m ? "text-primary font-semibold" : "text-foreground hover:bg-secondary"
-                      )}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-          <button
-            onClick={() => setAutoSpeak(!autoSpeak)}
-            className={cn(
-              "p-3 rounded-full transition-all duration-300",
-              autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-            )}
-            title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
-          >
-            {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          </button>
+        <div className="flex items-baseline gap-1">
+          <h2 className="font-display text-2xl leading-none text-sky-500">SÓI</h2>
+          <h2 className="font-display text-2xl leading-none text-foreground">Agent</h2>
         </div>
+        <button
+          onClick={() => setAutoSpeak(!autoSpeak)}
+          className={cn(
+            "ml-1 p-2 rounded-full transition-all duration-300",
+            autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+          )}
+          title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
+        >
+          {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
+        </button>
       </div>
 
       
@@ -152,10 +124,12 @@ export default function Home() {
               )}
             >
               <div className={cn(
-                "flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm",
+                "flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden",
                 msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
               )}>
-                {msg.role === "user" ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5 text-primary" />}
+                {msg.role === "user"
+                  ? <User className="w-5 h-5" />
+                  : <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />}
               </div>
               <div className={cn(
                 "p-4 rounded-2xl shadow-sm leading-relaxed",
@@ -179,8 +153,8 @@ export default function Home() {
               animate={{ opacity: 1 }}
               className="flex gap-4 max-w-[85%] mr-auto"
             >
-              <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-card border border-border flex items-center justify-center shadow-sm">
-                <Bot className="w-5 h-5 text-primary animate-pulse" />
+              <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-card border border-border overflow-hidden shadow-sm animate-pulse">
+                <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />
               </div>
               <div className="p-4 rounded-2xl bg-card border border-border rounded-tl-sm flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />

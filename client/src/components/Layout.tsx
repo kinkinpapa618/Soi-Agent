@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Sparkles, Menu, BarChart3 } from "lucide-react";
+import { MessageSquare, Package, Receipt, Menu, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -19,8 +19,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl sticky top-0 h-screen p-6">
         <div className="flex items-center gap-3 px-2 mb-12">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
-            <Sparkles className="w-7 h-7 text-white" />
+          <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-sky-500/30">
+            <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
           </div>
           <div className="flex items-baseline gap-1">
             <h1 className="font-display text-3xl leading-none text-sky-500">SÓI</h1>
@@ -73,8 +73,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-background/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md">
+              <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-baseline gap-1">
               <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>

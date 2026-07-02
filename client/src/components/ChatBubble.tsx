@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX, X, MessageCircle, ChevronDown } from "lucide-react";
+import { Mic, Send, User, Volume2, VolumeX, X, MessageCircle, Bot } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
 import { cn } from "@/lib/utils";
@@ -32,8 +32,7 @@ export function ChatBubble() {
   const [messages, setMessages] = useState<Message[]>(loadMessages);
   const [input, setInput] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(false);
-  const [modelOpen, setModelOpen] = useState(false);
-  const [currentModel, setCurrentModel] = useState("gpt-5.2");
+  const currentModel = "gpt-5.2";
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -133,55 +132,25 @@ export function ChatBubble() {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-card shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-primary-foreground" />
+                <div className="w-8 h-8 rounded-xl overflow-hidden shadow-sm">
+                  <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-foreground leading-none">SÓI Agent</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-bold text-foreground leading-none">SÓI Agent</p>
+                    <button
+                      onClick={() => setAutoSpeak(v => !v)}
+                      className={cn(
+                        "p-1 rounded-md transition-colors",
+                        autoSpeak ? "text-accent hover:bg-accent/10" : "text-muted-foreground hover:bg-secondary"
+                      )}
+                      title={autoSpeak ? "Tắt đọc tự động" : "Bật đọc tự động"}
+                    >
+                      {autoSpeak ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                   <p className="text-[10px] text-accent font-medium mt-0.5">● Trực tuyến</p>
                 </div>
-              </div>
-              <div className="flex items-center gap-1">
-                {/* Model Selector */}
-                <div className="relative">
-                  <button
-                    onClick={() => setModelOpen(!modelOpen)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary hover:bg-secondary/80 text-[11px] font-medium text-foreground transition-colors"
-                  >
-                    {currentModel}
-                    <ChevronDown className="w-3 h-3" />
-                  </button>
-                  {modelOpen && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setModelOpen(false)} />
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-card border border-border rounded-lg shadow-lg z-20 py-1">
-                        {["gpt-5.2", "gpt-5.1", "gpt-4o", "gpt-4o-mini", "o3"].map((m) => (
-                          <button
-                            key={m}
-                            onClick={() => { setCurrentModel(m); setModelOpen(false); }}
-                            className={cn(
-                              "w-full text-left px-3 py-2 text-xs transition-colors",
-                              currentModel === m ? "text-primary font-semibold" : "text-foreground hover:bg-secondary"
-                            )}
-                          >
-                            {m}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-                {/* Auto-speak toggle */}
-                <button
-                  onClick={() => setAutoSpeak(v => !v)}
-                  className={cn(
-                    "p-1.5 rounded-lg transition-colors",
-                    autoSpeak ? "bg-accent/10 text-accent" : "text-muted-foreground hover:bg-secondary"
-                  )}
-                  title={autoSpeak ? "Tắt đọc tự động" : "Bật đọc tự động"}
-                >
-                  {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                </button>
               </div>
             </div>
 
@@ -200,12 +169,12 @@ export function ChatBubble() {
                     )}
                   >
                     <div className={cn(
-                      "flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center",
+                      "flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center overflow-hidden",
                       msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
                     )}>
                       {msg.role === "user"
                         ? <User className="w-3.5 h-3.5" />
-                        : <Bot className="w-3.5 h-3.5 text-primary" />}
+                        : <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />}
                     </div>
                     <div className={cn(
                       "px-3 py-2 rounded-2xl text-sm leading-relaxed",
@@ -229,8 +198,8 @@ export function ChatBubble() {
                     animate={{ opacity: 1 }}
                     className="flex gap-2 max-w-[88%] mr-auto"
                   >
-                    <div className="flex-shrink-0 w-7 h-7 rounded-xl bg-card border border-border flex items-center justify-center">
-                      <Bot className="w-3.5 h-3.5 text-primary animate-pulse" />
+                    <div className="flex-shrink-0 w-7 h-7 rounded-xl bg-card border border-border overflow-hidden animate-pulse">
+                      <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />
                     </div>
                     <div className="px-3 py-2 rounded-2xl bg-card border border-border flex items-center gap-1.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
