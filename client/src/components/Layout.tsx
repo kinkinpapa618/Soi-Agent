@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Menu, BarChart3 } from "lucide-react";
+import { MessageSquare, Package, Receipt, Menu, BarChart3, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -13,6 +13,20 @@ const NAV_ITEMS = [
 export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(() => localStorage.getItem("soi_autospeak") !== "false");
+
+  useEffect(() => {
+    const handler = () => setAutoSpeak(localStorage.getItem("soi_autospeak") !== "false");
+    window.addEventListener("soi_autospeak_change", handler);
+    return () => window.removeEventListener("soi_autospeak_change", handler);
+  }, []);
+
+  const toggleAutoSpeak = () => {
+    const next = !autoSpeak;
+    setAutoSpeak(next);
+    localStorage.setItem("soi_autospeak", String(next));
+    window.dispatchEvent(new Event("soi_autospeak_change"));
+  };
 
   return (
     <div className="h-screen overflow-hidden bg-background flex flex-col md:flex-row">
@@ -26,6 +40,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <h1 className="font-display text-3xl leading-none text-sky-500">SÓI</h1>
             <h1 className="font-display text-3xl leading-none text-foreground">Agent</h1>
           </div>
+          <button
+            onClick={toggleAutoSpeak}
+            className={cn(
+              "ml-1 p-2 rounded-full transition-all duration-300",
+              autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+            )}
+            title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
+          >
+            {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+          </button>
         </div>
 
         <nav className="flex-1 flex flex-col gap-2">
@@ -76,9 +100,21 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md">
               <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
             </div>
-            <div className="flex items-baseline gap-1">
-              <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>
-              <h1 className="font-display text-xl leading-none text-foreground">Agent</h1>
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-baseline gap-1">
+                <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>
+                <h1 className="font-display text-xl leading-none text-foreground">Agent</h1>
+              </div>
+              <button
+                onClick={toggleAutoSpeak}
+                className={cn(
+                  "p-1.5 rounded-full transition-all duration-300",
+                  autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
+                )}
+                title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
+              >
+                {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+              </button>
             </div>
           </div>
           <div className="relative">

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User, Volume2, VolumeX } from "lucide-react";
+import { Mic, Send, Bot, User } from "lucide-react";
 import { useProcessChat } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
 
@@ -37,7 +37,12 @@ export default function Home() {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
   const [input, setInput] = useState("");
-  const [autoSpeak, setAutoSpeak] = useState(true);
+  const [autoSpeak, setAutoSpeak] = useState(() => localStorage.getItem("soi_autospeak") !== "false");
+  useEffect(() => {
+    const handler = () => setAutoSpeak(localStorage.getItem("soi_autospeak") !== "false");
+    window.addEventListener("soi_autospeak_change", handler);
+    return () => window.removeEventListener("soi_autospeak_change", handler);
+  }, []);
   const currentModel = "gpt-5.2";
   const chatEndRef = useRef<HTMLDivElement>(null);
   
@@ -86,27 +91,6 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      {/* Header Area */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-sky-500/20 flex-shrink-0">
-          <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
-        </div>
-        <div className="flex items-baseline gap-1">
-          <h2 className="font-display text-2xl leading-none text-sky-500">SÓI</h2>
-          <h2 className="font-display text-2xl leading-none text-foreground">Agent</h2>
-        </div>
-        <button
-          onClick={() => setAutoSpeak(!autoSpeak)}
-          className={cn(
-            "ml-1 p-2 rounded-full transition-all duration-300",
-            autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-          )}
-          title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
-        >
-          {autoSpeak ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-        </button>
-      </div>
-
       
 
       {/* Chat Messages */}
