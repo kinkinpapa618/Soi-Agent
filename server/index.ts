@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { registerRoutes } from "./routes";
+import { serveStatic } from "./static";
 import { createServer } from "http";
 
 process.on("uncaughtException", (err) => {
@@ -26,19 +28,17 @@ app.get("/health", (_req, res) => {
 
 (async () => {
   try {
-    const { registerRoutes } = await import("./routes");
-    const { serveStatic } = await import("./static");
     await registerRoutes(httpServer, app);
-
-    if (process.env.NODE_ENV === "production") {
-      try {
-        serveStatic(app);
-      } catch (err) {
-        console.error("Static serving unavailable:", err);
-      }
-    }
   } catch (err) {
-    console.error("Failed to load server modules:", err);
+    console.error("Failed to register routes:", err);
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    try {
+      serveStatic(app);
+    } catch (err) {
+      console.error("Static serving unavailable:", err);
+    }
   }
 
   const port = parseInt(process.env.PORT || "5000", 10);
