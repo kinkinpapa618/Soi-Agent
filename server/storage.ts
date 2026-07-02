@@ -9,6 +9,10 @@ import {
 import { eq, inArray, and } from "drizzle-orm";
 import { startOfDay, endOfDay } from "date-fns";
 
+function requireDb() {
+  if (!db) throw new Error("Database not configured - set DATABASE_URL");
+}
+
 export interface IStorage {
   getProducts(): Promise<typeof products.$inferSelect[]>;
   createProduct(product: InsertProduct): Promise<typeof products.$inferSelect>;

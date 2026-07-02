@@ -12,6 +12,11 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
 
+  // Health check
+  app.get("/health", (_req, res) => {
+    res.json({ status: "ok", db: !!process.env.DATABASE_URL });
+  });
+
   // Products
   app.get(api.products.list.path, async (req, res) => {
     const prods = await storage.getProducts();
