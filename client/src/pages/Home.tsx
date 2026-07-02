@@ -193,27 +193,6 @@ export default function Home() {
         <div ref={chatEndRef} />
       </div>
 
-      {supported && (
-        <div className="flex flex-col items-center gap-3 shrink-0 mt-auto">
-          <div className="flex flex-col items-center gap-2">
-            <button
-              onClick={toggle}
-              className={cn(
-                "flex-shrink-0 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 text-white shadow-lg",
-                isListening 
-                  ? "bg-accent animate-pulse-ring" 
-                  : "bg-primary hover:bg-primary/90 hover:shadow-xl hover:-translate-y-1 active:translate-y-0"
-              )}
-            >
-              <Mic className={cn("w-7 h-7", isListening && "scale-110")} />
-            </button>
-            <span className="text-xs text-muted-foreground italic">
-              {isListening ? "Đang nghe... (bấm để gửi)" : "Bấm để nói"}
-            </span>
-          </div>
-        </div>
-      )}
-
       {/* Input Area - Bottom */}
       <div className="bg-card border border-border rounded-3xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-2 shrink-0 mt-auto mb-[15px]">
         <textarea
@@ -230,10 +209,24 @@ export default function Home() {
           readOnly={isListening}
           className={cn(
             "w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 placeholder:text-muted-foreground",
-            isListening ? "text-accent italic" : "text-foreground"
+            isListening ? "text-sky-500 italic" : "text-foreground"
           )}
           rows={1}
         />
+        {supported && (
+          <button
+            onClick={toggle}
+            title={isListening ? "Dừng nghe" : "Bấm để nói"}
+            className={cn(
+              "flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all duration-200 mb-0.5 shadow-sm",
+              isListening
+                ? "bg-sky-400 animate-pulse-ring"
+                : "bg-sky-500 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+            )}
+          >
+            <Mic className={cn("w-5 h-5", isListening && "scale-110")} />
+          </button>
+        )}
         <button
           onClick={() => handleSend()}
           disabled={!input.trim() || chatMutation.isPending}

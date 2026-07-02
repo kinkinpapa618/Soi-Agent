@@ -243,28 +243,6 @@ export function ChatBubble() {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Voice button */}
-            {supported && (
-              <div className="flex justify-center py-1 shrink-0">
-                <div className="flex flex-col items-center gap-1">
-                  <button
-                    onClick={toggle}
-                    className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 text-white shadow-md",
-                      isListening
-                        ? "bg-accent animate-pulse-ring"
-                        : "bg-primary hover:bg-primary/90 active:scale-95"
-                    )}
-                  >
-                    <Mic className={cn("w-4 h-4", isListening && "scale-110")} />
-                  </button>
-                  <span className="text-[10px] text-muted-foreground italic">
-                    {isListening ? "Đang nghe..." : "Bấm để nói"}
-                  </span>
-                </div>
-              </div>
-            )}
-
             {/* Input */}
             <div className="px-3 pb-3 shrink-0">
               <div className="bg-card border border-border rounded-2xl flex items-end gap-2 p-1.5 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
@@ -284,9 +262,23 @@ export function ChatBubble() {
                   rows={1}
                   className={cn(
                     "flex-1 bg-transparent resize-none outline-none py-2 px-2 text-sm min-h-[36px] max-h-24 placeholder:text-muted-foreground",
-                    isListening ? "text-accent italic" : "text-foreground"
+                    isListening ? "text-sky-500 italic" : "text-foreground"
                   )}
                 />
+                {supported && (
+                  <button
+                    onClick={toggle}
+                    title={isListening ? "Dừng nghe" : "Bấm để nói"}
+                    className={cn(
+                      "flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-white transition-all duration-200 mb-0.5",
+                      isListening
+                        ? "bg-sky-400 animate-pulse-ring"
+                        : "bg-sky-500 hover:bg-sky-400 active:scale-95"
+                    )}
+                  >
+                    <Mic className={cn("w-4 h-4", isListening && "scale-110")} />
+                  </button>
+                )}
                 <button
                   onClick={() => handleSend()}
                   disabled={(!input.trim() && !interimText) || chatMutation.isPending}
