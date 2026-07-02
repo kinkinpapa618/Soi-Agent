@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, Response, NextFunction } from "express";
 import { createServer } from "http";
 
 process.on("uncaughtException", (err) => {
@@ -17,11 +17,32 @@ console.log("DATABASE_URL:", process.env.DATABASE_URL ? "set" : "not set");
 const app = express();
 const httpServer = createServer(app);
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
 app.get("/health", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({ status: "ok", db: !!process.env.DATABASE_URL });
 });
 
-const port = parseInt(process.env.PORT || "5000", 10);
-httpServer.listen(port, "0.0.0.0", () => {
-  console.log(`Server listening on port ${port}`);
-});
+(async () => {
+  try {
+    const { registerRoutes } = await import("./routes");
+    const { serveStatic } = await import("./static");
+    await registerRoutes(httpServer, app);
+
+    if (process.env.NODE_ENV === "production") {
+      try {
+        serveStatic(app);
+      } catch (err) {
+        console.error("Static serving unavailable:", err);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to load server modules:", err);
+  }
+
+  const port = parseInt(process.env.PORT || "5000", 10);
+  httpServer.listen(port, "0.0.0.0", () => {
+    console.log(`Server listening on port ${port}`);
+  });
+})();
