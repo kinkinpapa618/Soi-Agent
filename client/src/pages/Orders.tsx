@@ -4,6 +4,7 @@ import { format } from "date-fns";
 import { useOrders, useCompleteOrders, useDeleteOrder, useUpdateOrder, useUncompleteOrder } from "@/hooks/use-orders";
 import { formatCurrency, cn } from "@/lib/utils";
 import { CheckCircle2, Clock, MapPin, Phone, User, Loader2, Receipt, Pencil, Trash2, ChevronDown, ChevronUp, Check, X, Square, CheckSquare } from "lucide-react";
+import { ChatBubble } from "@/components/ChatBubble";
 
 export default function Orders() {
   const { data: orders, isLoading } = useOrders();
@@ -484,6 +485,7 @@ export default function Orders() {
           </motion.div>
         )}
       </AnimatePresence>
+      <ChatBubble />
     </div>
   );
 }
