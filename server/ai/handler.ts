@@ -121,16 +121,36 @@ export class AgentHandler {
     conversationMessages.push({ role: "user", content: req.message });
 
     const isDeepSeek = modelKey.startsWith("deepseek-");
-    const response = await selected.client.chat.completions.create({
-      model: selected.model,
-      messages: conversationMessages,
-      ...(isDeepSeek ? {} : { response_format: { type: "json_object" } }),
-    });
+    let response;
+    try {
+      response = await selected.client.chat.completions.create({
+        model: selected.model,
+        messages: conversationMessages,
+        ...(isDeepSeek ? {} : { response_format: { type: "json_object" } }),
+      });
+    } catch (err: any) {
+      const msg = err?.message || "Lỗi kết nối AI";
+      return { reply: `Lỗi AI: ${msg}`, action: "NONE" };
+    }
 
     const content = response.choices[0]?.message?.content;
     if (!content) throw new Error("No response from AI");
 
-    const parsed = JSON.parse(content) as ChatResponse;
+    let parsed: ChatResponse;
+    try {
+      parsed = JSON.parse(content) as ChatResponse;
+    } catch {
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          parsed = JSON.parse(jsonMatch[0]) as ChatResponse;
+        } catch {
+          parsed = { reply: content, action: "NONE" };
+        }
+      } else {
+        parsed = { reply: content, action: "NONE" };
+      }
+    }
 
     await this.executeAction(parsed);
 
