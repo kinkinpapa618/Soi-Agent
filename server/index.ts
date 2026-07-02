@@ -89,11 +89,12 @@ console.log("DATABASE_URL:", process.env.DATABASE_URL ? "set" : "not set");
     return res.status(status).json({ message });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
+    try {
+      serveStatic(app);
+    } catch (err) {
+      console.error("Static serving unavailable:", err);
+    }
   } else {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
