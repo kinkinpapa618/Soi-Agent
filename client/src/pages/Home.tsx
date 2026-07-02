@@ -45,19 +45,11 @@ export default function Home() {
   const chatMutation = useProcessChat();
   
   const handleSpeechResult = (text: string) => {
-    setInput(text);
+    setInput("");
     handleSend(text);
   };
 
-  const { isListening, listen, stop, speak, supported } = useSpeech(handleSpeechResult);
-
-  const handleVoiceToggle = () => {
-    if (isListening) {
-      stop();
-    } else {
-      listen();
-    }
-  };
+  const { isListening, interimText, toggle, speak, supported } = useSpeech(handleSpeechResult);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -205,7 +197,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-3 shrink-0 mt-auto">
           <div className="flex flex-col items-center gap-2">
             <button
-              onClick={handleVoiceToggle}
+              onClick={toggle}
               className={cn(
                 "flex-shrink-0 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 text-white shadow-lg",
                 isListening 
@@ -216,7 +208,7 @@ export default function Home() {
               <Mic className={cn("w-7 h-7", isListening && "scale-110")} />
             </button>
             <span className="text-xs text-muted-foreground italic">
-              {isListening ? "Đang nghe..." : "Bấm để nói"}
+              {isListening ? "Đang nghe... (bấm để gửi)" : "Bấm để nói"}
             </span>
           </div>
         </div>
@@ -225,16 +217,21 @@ export default function Home() {
       {/* Input Area - Bottom */}
       <div className="bg-card border border-border rounded-3xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-2 shrink-0 mt-auto mb-[15px]">
         <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          value={isListening && interimText ? interimText : input}
+          onChange={(e) => !isListening && setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
-              handleSend();
+              if (isListening) toggle();
+              else handleSend();
             }
           }}
-          placeholder="Hãy ra lệnh..."
-          className="w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 text-foreground placeholder:text-muted-foreground"
+          placeholder={isListening ? "Đang nhận giọng nói..." : "Hãy ra lệnh..."}
+          readOnly={isListening}
+          className={cn(
+            "w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 placeholder:text-muted-foreground",
+            isListening ? "text-accent italic" : "text-foreground"
+          )}
           rows={1}
         />
         <button
