@@ -41,7 +41,12 @@ export function useProcessChat() {
       });
       
       if (!res.ok) throw new Error("Failed to process chat");
-      return api.chat.process.responses[200].parse(await res.json());
+      const text = await res.text();
+      try {
+        return api.chat.process.responses[200].parse(JSON.parse(text));
+      } catch {
+        throw new Error("Server returned invalid response (non-JSON). Try refreshing the page.");
+      }
     },
     onSuccess: (data) => {
       if (data.action) {
