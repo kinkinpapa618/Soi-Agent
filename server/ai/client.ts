@@ -1,34 +1,42 @@
 import OpenAI from "openai";
 import type { Models } from "./types";
 
-export function createAIClients(apiKeys?: Record<string, string>): Models {
-  const openai = new OpenAI({
-    apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  });
+function createSafeClient(apiKey?: string, baseURL?: string): OpenAI | null {
+  try {
+    if (!apiKey) return null;
+    return new OpenAI({ apiKey, baseURL });
+  } catch {
+    return null;
+  }
+}
 
-  const nvidiaClient = new OpenAI({
-    apiKey: process.env.NVIDIA_API_KEY || "",
-    baseURL: "https://integrate.api.nvidia.com/v1",
-  });
+export function createAIClients(apiKeys?: Record<string, string>): Models {
+  const openai = createSafeClient(
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+    process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  );
+
+  const nvidiaClient = createSafeClient(
+    process.env.NVIDIA_API_KEY,
+    "https://integrate.api.nvidia.com/v1",
+  );
 
   const deepseekApiKey = apiKeys?.deepseek || process.env.DEEPSEEK_API_KEY;
+  const deepseekClient = createSafeClient(deepseekApiKey, "https://api.deepseek.com");
 
-  const deepseekClient = deepseekApiKey
-    ? new OpenAI({
-        apiKey: deepseekApiKey,
-        baseURL: "https://api.deepseek.com",
-      })
-    : null;
+  const models: Models = {};
 
-  const models: Models = {
-    "gpt-5.2": { client: openai, model: "gpt-5.2" },
-    "gpt-5.1": { client: openai, model: "gpt-5.1" },
-    "gpt-4o": { client: openai, model: "gpt-4o" },
-    "gpt-4o-mini": { client: openai, model: "gpt-4o-mini" },
-    "o3": { client: openai, model: "o3" },
-    "gemma-2-2b-it": { client: nvidiaClient, model: "google/gemma-2-2b-it" },
-  };
+  if (openai) {
+    models["gpt-5.2"] = { client: openai, model: "gpt-5.2" };
+    models["gpt-5.1"] = { client: openai, model: "gpt-5.1" };
+    models["gpt-4o"] = { client: openai, model: "gpt-4o" };
+    models["gpt-4o-mini"] = { client: openai, model: "gpt-4o-mini" };
+    models["o3"] = { client: openai, model: "o3" };
+  }
+
+  if (nvidiaClient) {
+    models["gemma-2-2b-it"] = { client: nvidiaClient, model: "google/gemma-2-2b-it" };
+  }
 
   if (deepseekClient) {
     models["deepseek-chat"] = { client: deepseekClient, model: "deepseek-chat" };

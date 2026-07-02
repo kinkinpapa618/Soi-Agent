@@ -86,14 +86,26 @@ export class AgentHandler {
     const systemPrompt = buildSystemPrompt(ctx);
     const modelKey = req.model || "gpt-5.2";
 
-    let selected = this.models[modelKey] || this.models["gpt-5.2"];
+    let selected = this.models[modelKey];
 
     if (modelKey.startsWith("deepseek-") && req.apiKeys?.deepseek) {
-      const dynamicClient = new OpenAI({
-        apiKey: req.apiKeys.deepseek,
-        baseURL: "https://api.deepseek.com",
-      });
-      selected = { client: dynamicClient, model: modelKey };
+      try {
+        const dynamicClient = new OpenAI({
+          apiKey: req.apiKeys.deepseek,
+          baseURL: "https://api.deepseek.com",
+        });
+        selected = { client: dynamicClient, model: modelKey };
+      } catch {
+        return { reply: "Lỗi: Không thể kết nối DeepSeek với API key đã cung cấp", action: "NONE" };
+      }
+    }
+
+    if (!selected) {
+      const fallback = Object.values(this.models)[0];
+      if (!fallback) {
+        return { reply: "Lỗi: Không có mô hình AI nào khả dụng. Vui lòng cấu hình API key trong Cài đặt.", action: "NONE" };
+      }
+      selected = fallback;
     }
 
     const conversationMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
