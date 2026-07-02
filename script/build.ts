@@ -4,7 +4,7 @@ import { rm, readFile } from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times
@@ -60,8 +60,8 @@ async function buildAll() {
       "process.env.NODE_ENV": '"production"',
     },
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
-      "@shared": path.resolve(__dirname, "shared"),
+      "@": path.resolve(projectRoot, "client", "src"),
+      "@shared": path.resolve(projectRoot, "shared"),
     },
     minify: true,
     external: externals,
