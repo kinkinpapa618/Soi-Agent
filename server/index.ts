@@ -3,6 +3,15 @@ import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
 
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("UNHANDLED REJECTION:", reason);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -58,6 +67,11 @@ app.use((req, res, next) => {
 
   next();
 });
+
+console.log("Starting server...");
+console.log("NODE_ENV:", process.env.NODE_ENV);
+console.log("PORT:", process.env.PORT);
+console.log("DATABASE_URL:", process.env.DATABASE_URL ? "set" : "not set");
 
 (async () => {
   await registerRoutes(httpServer, app);
