@@ -112,6 +112,7 @@ export const api = {
           role: z.enum(["user", "assistant"]),
           content: z.string(),
         })).optional(),
+        apiKeys: z.record(z.string()).optional(),
       }),
       responses: {
         200: z.object({

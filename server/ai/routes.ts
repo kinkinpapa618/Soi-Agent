@@ -62,6 +62,7 @@ export function registerAIRoutes(app: Express, storage: IStorage, chatStorage: I
           role: z.enum(["user", "assistant"]),
           content: z.string(),
         })).optional(),
+        apiKeys: z.record(z.string()).optional(),
       }).parse(req.body);
 
       const result = await agent.process(input);

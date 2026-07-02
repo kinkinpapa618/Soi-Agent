@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, User, Volume2, VolumeX, X, MessageCircle, Bot } from "lucide-react";
-import { useProcessChat } from "@/hooks/use-chat";
+import { Mic, Send, User, Volume2, VolumeX, X, MessageCircle, Bot, Settings } from "lucide-react";
+import { useProcessChat, getDefaultModel } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
 type Message = {
@@ -32,7 +33,13 @@ export function ChatBubble() {
   const [messages, setMessages] = useState<Message[]>(loadMessages);
   const [input, setInput] = useState("");
   const [autoSpeak, setAutoSpeak] = useState(false);
-  const currentModel = "gpt-5.2";
+  const [currentModel, setCurrentModel] = useState(getDefaultModel);
+  useEffect(() => {
+    const handler = () => setCurrentModel(getDefaultModel());
+    window.addEventListener("soi_settings_change", handler);
+    return () => window.removeEventListener("soi_settings_change", handler);
+  }, []);
+  const [, navigate] = useLocation();
   const chatEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -148,8 +155,16 @@ export function ChatBubble() {
                     >
                       {autoSpeak ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
                     </button>
+                    <button
+                      onClick={() => navigate("/settings")}
+                      className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+                      title="Cài đặt"
+                    >
+                      <Settings className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                   <p className="text-[10px] text-accent font-medium mt-0.5">● Trực tuyến</p>
+                  <p className="text-[8px] text-muted-foreground mt-0.5">{currentModel}</p>
                 </div>
               </div>
             </div>

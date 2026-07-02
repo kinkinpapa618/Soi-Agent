@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Menu, BarChart3, Volume2, VolumeX } from "lucide-react";
+import { MessageSquare, Package, Receipt, Menu, BarChart3, Volume2, VolumeX, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/orders", label: "Đơn hàng", icon: Receipt },
   { href: "/products", label: "Mặt hàng", icon: Package },
   { href: "/reports", label: "Báo cáo", icon: BarChart3 },
+  { href: "/settings", label: "Cài đặt", icon: Settings },
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {

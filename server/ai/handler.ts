@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import type { Models, ChatRequest, ChatResponse, AgentContext } from "./types";
 import type { IStorage } from "../storage";
 import type { IChatStorage } from "../replit_integrations/chat/storage";
@@ -84,7 +85,16 @@ export class AgentHandler {
 
     const systemPrompt = buildSystemPrompt(ctx);
     const modelKey = req.model || "gpt-5.2";
-    const selected = this.models[modelKey] || this.models["gpt-5.2"];
+
+    let selected = this.models[modelKey] || this.models["gpt-5.2"];
+
+    if (modelKey.startsWith("deepseek-") && req.apiKeys?.deepseek) {
+      const dynamicClient = new OpenAI({
+        apiKey: req.apiKeys.deepseek,
+        baseURL: "https://api.deepseek.com",
+      });
+      selected = { client: dynamicClient, model: modelKey };
+    }
 
     const conversationMessages: { role: "system" | "user" | "assistant"; content: string }[] = [
       { role: "system", content: systemPrompt },

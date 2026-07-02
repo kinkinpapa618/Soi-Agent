@@ -11,6 +11,7 @@ export interface ChatRequest {
   message: string;
   model?: string;
   history?: { role: "user" | "assistant"; content: string }[];
+  apiKeys?: Record<string, string>;
 }
 
 export interface ChatResponse {

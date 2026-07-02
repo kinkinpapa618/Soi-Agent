@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Send, Bot, User } from "lucide-react";
-import { useProcessChat } from "@/hooks/use-chat";
+import { Mic, Send, Bot, User, Settings } from "lucide-react";
+import { useProcessChat, getDefaultModel } from "@/hooks/use-chat";
 import { useSpeech } from "@/hooks/use-speech";
+import { Link } from "wouter";
 
 import { cn } from "@/lib/utils";
 
@@ -43,7 +44,12 @@ export default function Home() {
     window.addEventListener("soi_autospeak_change", handler);
     return () => window.removeEventListener("soi_autospeak_change", handler);
   }, []);
-  const currentModel = "gpt-5.2";
+  const [currentModel, setCurrentModel] = useState(getDefaultModel);
+  useEffect(() => {
+    const handler = () => setCurrentModel(getDefaultModel());
+    window.addEventListener("soi_settings_change", handler);
+    return () => window.removeEventListener("soi_settings_change", handler);
+  }, []);
   const chatEndRef = useRef<HTMLDivElement>(null);
   
   const chatMutation = useProcessChat();
@@ -91,7 +97,16 @@ export default function Home() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0">
-      
+      {/* Model Indicator */}
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <Link
+          href="/settings"
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Settings className="w-3.5 h-3.5" />
+          <span className="font-medium">{currentModel}</span>
+        </Link>
+      </div>
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto pr-2 pb-2 space-y-2 min-h-0">
