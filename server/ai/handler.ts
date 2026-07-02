@@ -108,10 +108,11 @@ export class AgentHandler {
 
     conversationMessages.push({ role: "user", content: req.message });
 
+    const isDeepSeek = modelKey.startsWith("deepseek-");
     const response = await selected.client.chat.completions.create({
       model: selected.model,
       messages: conversationMessages,
-      response_format: { type: "json_object" },
+      ...(isDeepSeek ? {} : { response_format: { type: "json_object" } }),
     });
 
     const content = response.choices[0]?.message?.content;

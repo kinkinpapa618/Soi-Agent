@@ -47,11 +47,11 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto w-full">
+    <div className="max-w-2xl mx-auto w-full h-full overflow-y-auto">
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-6 pb-8"
       >
         <div>
           <h1 className="text-2xl font-bold text-foreground">Cài đặt</h1>
