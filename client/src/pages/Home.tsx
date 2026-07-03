@@ -104,9 +104,9 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 max-h-full">
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto pr-2 pb-2 space-y-2 min-h-0">
+      <div className="flex-1 overflow-y-auto pr-1 md:pr-2 pb-2 space-y-2 min-h-0">
         <AnimatePresence initial={false}>
           {messages.map((msg) => (
             <motion.div
@@ -115,27 +115,27 @@ export default function Home() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               className={cn(
-                "flex gap-4 max-w-[85%]",
+                "flex gap-2 md:gap-4 max-w-[95%] md:max-w-[85%]",
                 msg.role === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
               )}
             >
               <div className={cn(
-                "flex-shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center shadow-sm overflow-hidden",
+                "flex-shrink-0 w-8 md:w-10 h-8 md:h-10 rounded-xl md:rounded-2xl flex items-center justify-center shadow-sm overflow-hidden",
                 msg.role === "user" ? "bg-primary text-primary-foreground" : "bg-card border border-border"
               )}>
                 {msg.role === "user"
-                  ? <User className="w-5 h-5" />
+                  ? <User className="w-4 md:w-5 h-4 md:h-5" />
                   : <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />}
               </div>
               <div className={cn(
-                "p-4 rounded-2xl shadow-sm leading-relaxed",
+                "p-3 md:p-4 rounded-2xl shadow-sm leading-relaxed text-sm md:text-base",
                 msg.role === "user" 
                   ? "bg-primary text-primary-foreground rounded-tr-sm" 
                   : "bg-card border border-border text-foreground rounded-tl-sm"
               )}>
                 <p>{msg.content}</p>
                 <span className={cn(
-                  "text-[10px] font-medium mt-2 block opacity-50",
+                  "text-[10px] font-medium mt-1 md:mt-2 block opacity-50",
                   msg.role === "user" ? "text-right" : "text-left"
                 )}>
                   {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -147,15 +147,15 @@ export default function Home() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex gap-4 max-w-[85%] mr-auto"
+              className="flex gap-2 md:gap-4 max-w-[95%] md:max-w-[85%] mr-auto"
             >
-              <div className="flex-shrink-0 w-10 h-10 rounded-2xl bg-card border border-border overflow-hidden shadow-sm animate-pulse">
+              <div className="flex-shrink-0 w-8 md:w-10 h-8 md:h-10 rounded-xl md:rounded-2xl bg-card border border-border overflow-hidden shadow-sm animate-pulse">
                 <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />
               </div>
-              <div className="p-4 rounded-2xl bg-card border border-border rounded-tl-sm flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "150ms" }} />
-                <div className="w-2 h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "300ms" }} />
+              <div className="p-3 md:p-4 rounded-2xl bg-card border border-border rounded-tl-sm flex items-center gap-1.5 md:gap-2">
+                <div className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-1.5 md:w-2 h-1.5 md:h-2 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </motion.div>
           )}
@@ -164,7 +164,7 @@ export default function Home() {
       </div>
 
       {/* Input Area - Bottom */}
-      <div className="bg-card border border-border rounded-3xl p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-2 shrink-0 mt-auto mb-[15px]">
+      <div className="bg-card border border-border rounded-2xl md:rounded-3xl p-1.5 md:p-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all duration-300 flex items-end gap-1 md:gap-2 shrink-0 mt-auto mb-2 md:mb-[15px]">
         <textarea
           value={isListening && interimText ? interimText : input}
           onChange={(e) => !isListening && setInput(e.target.value)}
@@ -178,7 +178,7 @@ export default function Home() {
           placeholder={isListening ? "Đang nhận giọng nói..." : "Hãy ra lệnh..."}
           readOnly={isListening}
           className={cn(
-            "w-full max-h-32 min-h-[48px] bg-transparent resize-none outline-none py-3 px-4 placeholder:text-muted-foreground",
+            "w-full max-h-32 min-h-[40px] md:min-h-[48px] bg-transparent resize-none outline-none py-2 md:py-3 px-3 md:px-4 text-sm md:text-base placeholder:text-muted-foreground",
             isListening ? "text-sky-500 italic" : "text-foreground"
           )}
           rows={1}
@@ -188,21 +188,21 @@ export default function Home() {
             onClick={toggle}
             title={isListening ? "Dừng nghe" : "Bấm để nói"}
             className={cn(
-              "flex-shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center text-white transition-all duration-200 mb-0.5 shadow-sm",
+              "flex-shrink-0 w-10 md:w-12 h-10 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white transition-all duration-200 mb-0.5 shadow-sm",
               isListening
                 ? "bg-sky-400 animate-pulse-ring"
                 : "bg-sky-500 hover:bg-sky-400 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
             )}
           >
-            <Mic className={cn("w-5 h-5", isListening && "scale-110")} />
+            <Mic className={cn("w-4 md:w-5 h-4 md:h-5", isListening && "scale-110")} />
           </button>
         )}
         <button
           onClick={() => handleSend()}
           disabled={!input.trim() || chatMutation.isPending}
-          className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 mb-0.5 mr-0.5"
+          className="flex-shrink-0 w-10 md:w-12 h-10 md:h-12 rounded-xl md:rounded-2xl bg-primary text-primary-foreground flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 mb-0.5"
         >
-          <Send className="w-5 h-5 ml-1" />
+          <Send className="w-4 md:w-5 h-4 md:h-5 ml-0.5 md:ml-1" />
         </button>
       </div>
 

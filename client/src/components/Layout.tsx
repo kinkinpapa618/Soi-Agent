@@ -30,7 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-background flex flex-col md:flex-row">
+    <div className="h-dvh min-h-dvh overflow-hidden bg-background flex flex-col md:flex-row">
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl sticky top-0 h-screen p-6">
         <div className="flex items-center gap-3 px-2 mb-12">
@@ -94,7 +94,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 relative h-full overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 relative h-full min-h-0 overflow-hidden">
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-background/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50">
           <div className="flex items-center gap-3">
@@ -152,7 +152,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-8 max-w-5xl mx-auto w-full">
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-8 max-w-5xl mx-auto w-full" style={{ maxHeight: '100%' }}>
           {children}
         </div>
       </main>
