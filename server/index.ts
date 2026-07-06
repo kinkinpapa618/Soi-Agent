@@ -39,6 +39,14 @@ app.get("/health", (_req, res) => {
     } catch (err) {
       console.error("Static serving unavailable:", err);
     }
+  } else {
+    try {
+      const { setupVite } = await import("./vite");
+      await setupVite(httpServer, app);
+      console.log("Vite dev server enabled");
+    } catch (err) {
+      console.error("Vite setup failed:", err);
+    }
   }
 
   const port = parseInt(process.env.PORT || "5000", 10);
