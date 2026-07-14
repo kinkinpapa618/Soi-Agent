@@ -12,4 +12,3 @@ export {
   speechToText,
   speechToTextStream,
 } from "./client";
-export { fptSpeechToText, type FptAsrResponse } from "./fpt";

@@ -1,4 +1,4 @@
-import express, { type Express } from "express";
+import type { Express } from "express";
 import type { Server } from "http";
 import { storage } from "./storage";
 import { chatStorage } from "./replit_integrations/chat/storage";
@@ -6,7 +6,6 @@ import { brain } from "./brain";
 import { api } from "@shared/routes";
 import { z } from "zod";
 import { registerAIRoutes } from "./ai";
-import { fptSpeechToText } from "./replit_integrations/audio/fpt";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -131,28 +130,6 @@ export async function registerRoutes(
 
   // AI module - chat + brain instructions
   registerAIRoutes(app, storage, chatStorage, brain);
-
-  // FPT AI Speech-to-Text
-  const sttBodyParser = express.json({ limit: "50mb" });
-  app.post("/api/stt", sttBodyParser, async (req, res) => {
-    try {
-      const { audio } = req.body;
-      if (!audio) {
-        return res.status(400).json({ error: "Audio data (base64) is required" });
-      }
-
-      const audioBuffer = Buffer.from(audio, "base64");
-      const result = await fptSpeechToText(audioBuffer);
-
-      res.json({
-        text: result.text,
-        confidence: result.confidence,
-      });
-    } catch (error: any) {
-      console.error("FPT STT error:", error);
-      res.status(500).json({ error: error.message || "Speech-to-text failed" });
-    }
-  });
 
   // Download AI module
   app.get("/api/ai/module", async (_req, res) => {
