@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, CheckCircle2, Circle, Trash2, Calendar, Clock } from "lucide-react";
+import { Plus, CheckCircle2, Circle, Trash2, Calendar, Clock, Pause } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
@@ -16,6 +16,13 @@ const PRIORITY_LABELS: Record<string, string> = {
   high: "Cao",
   medium: "Vừa",
   low: "Thấp",
+};
+
+const STATUS_BG: Record<string, string> = {
+  pending: "bg-amber-50 border-amber-200/50",
+  in_progress: "bg-blue-50 border-blue-200/50",
+  completed: "bg-emerald-50 border-emerald-200/50",
+  cancelled: "bg-red-50 border-red-200/50",
 };
 
 const STATUS_TABS = [
@@ -95,7 +102,7 @@ export default function Tasks() {
         <h2 className="text-xl md:text-2xl font-display font-bold">Công việc</h2>
         <button
           onClick={() => setShowInput(!showInput)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2 text-sm font-semibold hover:shadow-lg transition-all"
+          className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-sm font-semibold hover:shadow-lg transition-all"
         >
           <Plus className="w-4 h-4" /> Thêm
         </button>
@@ -109,10 +116,10 @@ export default function Tasks() {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="Nhập tên công việc..."
-              className="flex-1 bg-card border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+              className="flex-1 bg-card border border-border rounded-xl px-4 py-3 text-base outline-none focus:ring-2 focus:ring-primary/20"
             />
             <button type="submit" disabled={!newTitle.trim()}
-              className="bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50">
+              className="bg-primary text-primary-foreground rounded-xl px-5 py-3 text-base font-semibold disabled:opacity-50">
               Tạo
             </button>
           </div>
@@ -124,7 +131,7 @@ export default function Tasks() {
           <button key={tab.key}
             onClick={() => setStatusFilter(tab.key)}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+              "px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all",
               statusFilter === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
             )}>
             {tab.label}
@@ -132,55 +139,78 @@ export default function Tasks() {
         ))}
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 space-y-2">
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-2.5">
         {isLoading ? (
           <div className="text-center text-muted-foreground py-8">Đang tải...</div>
         ) : tasks.length === 0 ? (
-          <div className="text-center text-muted-foreground py-8">
+          <div className="text-center text-muted-foreground py-12">
             <div className="text-4xl mb-2">📋</div>
-            <p className="text-sm">Chưa có công việc nào</p>
-            <p className="text-xs mt-1">Dùng chat AI để tạo nhanh bằng giọng nói</p>
+            <p className="text-base">Chưa có công việc nào</p>
+            <p className="text-sm mt-1">Dùng chat AI để tạo nhanh bằng giọng nói</p>
           </div>
         ) : (
           tasks.map((task: any) => {
             const cat = getCategory(task.categoryId);
             const isDone = task.status === "completed";
+            const isCancelled = task.status === "cancelled";
+            const isInProgress = task.status === "in_progress";
+            const statusBg = STATUS_BG[task.status] || "";
+
             return (
               <div key={task.id}
                 className={cn(
-                  "flex items-start gap-3 bg-card border border-border rounded-xl p-3 md:p-4 transition-all group hover:shadow-sm",
-                  isDone && "opacity-60"
+                  "flex items-start gap-3 border rounded-xl p-3 md:p-4 transition-all group hover:shadow-md",
+                  statusBg,
+                  (isDone || isCancelled) && "opacity-60"
                 )}>
                 <button onClick={() => completeTask.mutate(task.id)}
-                  className="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-primary transition-colors">
-                  {isDone ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5" />}
+                  disabled={isCancelled}
+                  className="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-30">
+                  {isDone ? <CheckCircle2 className="w-5 h-5 text-emerald-500" /> 
+                    : isInProgress ? <Clock className="w-5 h-5 text-blue-500" />
+                    : isCancelled ? <Pause className="w-5 h-5 text-red-400" />
+                    : <Circle className="w-5 h-5" />}
                 </button>
 
                 <div className="flex-1 min-w-0">
                   <Link href={`/tasks/${task.id}`}
-                    className={cn("text-sm font-medium hover:text-primary transition-colors cursor-pointer block", isDone && "line-through text-muted-foreground")}>
+                    className={cn("text-[15px] font-semibold hover:text-primary transition-colors cursor-pointer block",
+                      isDone && "line-through text-muted-foreground",
+                      isCancelled && "line-through text-muted-foreground"
+                    )}>
                     {task.title}
                   </Link>
-                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase", PRIORITY_COLORS[task.priority] || "")}>
+                  {task.description && (
+                    <p className="text-[13px] text-muted-foreground mt-0.5 line-clamp-1">{task.description}</p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <span className={cn("text-[11px] font-bold px-2 py-0.5 rounded-md uppercase", PRIORITY_COLORS[task.priority] || "")}>
                       {PRIORITY_LABELS[task.priority] || task.priority}
                     </span>
                     {cat && (
-                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground">
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-secondary text-muted-foreground">
                         {cat.icon} {cat.name}
                       </span>
                     )}
+                    {task.startDate && task.dueDate && (() => {
+                      const days = Math.round((new Date(task.dueDate).getTime() - new Date(task.startDate).getTime()) / 86400000) + 1;
+                      if (days > 1) return <span className="text-[11px] text-pink-500 font-medium">📆 {days} ngày</span>;
+                      return null;
+                    })()}
                     {task.dueDate && (
-                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(task.dueDate).toLocaleDateString("vi-VN")}
                       </span>
+                    )}
+                    {isInProgress && !isDone && (
+                      <span className="text-[11px] text-blue-500 font-medium">Đang thực hiện</span>
                     )}
                   </div>
                 </div>
 
                 <button onClick={() => deleteTask.mutate(task.id)}
-                  className="flex-shrink-0 p-1 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all">
+                  className="flex-shrink-0 p-1.5 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
