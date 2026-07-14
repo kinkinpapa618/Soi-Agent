@@ -12,6 +12,7 @@ import Home from "@/pages/Home";
 import Tasks from "@/pages/Tasks";
 import TaskDetail from "@/pages/TaskDetail";
 import Calendar from "@/pages/Calendar";
+import Categories from "@/pages/Categories";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -47,6 +48,7 @@ function Router() {
               <Route path="/tasks" component={Tasks} />
               <Route path="/tasks/:id" component={TaskDetail} />
               <Route path="/calendar" component={Calendar} />
+              <Route path="/categories" component={Categories} />
               <Route path="/settings" component={Settings} />
               <Route component={NotFound} />
             </Switch>
