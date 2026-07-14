@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, CheckCircle2, Circle, Trash2, Calendar, Clock } from "lucide-react";
+import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 const PRIORITY_COLORS: Record<string, string> = {
@@ -156,9 +157,10 @@ export default function Tasks() {
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <p className={cn("text-sm font-medium", isDone && "line-through text-muted-foreground")}>
+                  <Link href={`/tasks/${task.id}`}
+                    className={cn("text-sm font-medium hover:text-primary transition-colors cursor-pointer block", isDone && "line-through text-muted-foreground")}>
                     {task.title}
-                  </p>
+                  </Link>
                   <div className="flex flex-wrap items-center gap-2 mt-1.5">
                     <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase", PRIORITY_COLORS[task.priority] || "")}>
                       {PRIORITY_LABELS[task.priority] || task.priority}

@@ -106,6 +106,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       if (input.reminderAt !== undefined) updates.reminderAt = input.reminderAt ? new Date(input.reminderAt) : null;
 
       const task = await storage.updateTask(Number(req.params.id), user.id, updates);
+      if (!task) return res.status(404).json({ error: "Task not found" });
       await storage.logActivity({ taskId: task.id, userId: user.id, action: "updated", changes: updates });
       res.json(task);
     } catch (err: any) {
@@ -118,6 +119,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     try {
       const user = (req as any).user;
       const task = await storage.completeTask(Number(req.params.id), user.id);
+      if (!task) return res.status(404).json({ error: "Task not found" });
       await storage.logActivity({ taskId: task.id, userId: user.id, action: "completed" });
       res.json(task);
     } catch (err) { res.status(500).json({ error: "Failed to complete task" }); }

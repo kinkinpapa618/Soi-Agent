@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Layout } from "@/components/Layout";
 import Home from "@/pages/Home";
 import Tasks from "@/pages/Tasks";
+import TaskDetail from "@/pages/TaskDetail";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -42,6 +43,7 @@ function Router() {
             <Switch>
               <Route path="/" component={Home} />
               <Route path="/tasks" component={Tasks} />
+              <Route path="/tasks/:id" component={TaskDetail} />
               <Route path="/settings" component={Settings} />
               <Route component={NotFound} />
             </Switch>
