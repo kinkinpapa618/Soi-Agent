@@ -29,7 +29,7 @@ export function getDefaultModel(): string {
 
 export function useProcessChat() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async ({ message, model, history }: { message: string; model?: string; history?: { role: string; content: string }[] }) => {
       const apiKeys = getApiKeys();
@@ -39,7 +39,7 @@ export function useProcessChat() {
         body: JSON.stringify({ message, model, history, apiKeys }),
         credentials: "include",
       });
-      
+
       if (!res.ok) throw new Error("Failed to process chat");
       const text = await res.text();
       try {
@@ -50,11 +50,10 @@ export function useProcessChat() {
     },
     onSuccess: (data) => {
       if (data.action) {
-        if (data.action.includes("PRODUCT")) {
-          queryClient.invalidateQueries({ queryKey: [api.products.list.path] });
-        }
-        if (data.action.includes("ORDER")) {
-          queryClient.invalidateQueries({ queryKey: [api.orders.list.path] });
+        if (data.action.includes("TASK") || data.action.includes("CATEGORY")) {
+          queryClient.invalidateQueries({ queryKey: ["/api/tasks"] });
+          queryClient.invalidateQueries({ queryKey: ["tasks"] });
+          queryClient.invalidateQueries({ queryKey: ["categories"] });
         }
       }
     }

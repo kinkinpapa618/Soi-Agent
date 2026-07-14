@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, Package, Receipt, Menu, BarChart3, Volume2, VolumeX, Settings } from "lucide-react";
+import { MessageSquare, CheckSquare, Menu, Volume2, VolumeX, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 const NAV_ITEMS = [
   { href: "/", label: "Trợ Lý AI", icon: MessageSquare },
-  { href: "/orders", label: "Đơn hàng", icon: Receipt },
-  { href: "/products", label: "Mặt hàng", icon: Package },
-  { href: "/reports", label: "Báo cáo", icon: BarChart3 },
+  { href: "/tasks", label: "Công việc", icon: CheckSquare },
   { href: "/settings", label: "Cài đặt", icon: Settings },
 ];
 
@@ -15,6 +14,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(() => localStorage.getItem("soi_autospeak") !== "false");
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handler = () => setAutoSpeak(localStorage.getItem("soi_autospeak") !== "false");
@@ -35,35 +35,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <aside className="hidden md:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl sticky top-0 h-screen p-6">
         <div className="flex items-center gap-3 px-2 mb-12">
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-sky-500/30">
-            <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
+            <img src="/icon-512.png" alt="SÓI Task" className="w-full h-full object-cover" />
           </div>
           <div className="flex items-baseline gap-1">
             <h1 className="font-display text-3xl leading-none text-sky-500">SÓI</h1>
-            <h1 className="font-display text-3xl leading-none text-foreground">Agent</h1>
+            <h1 className="font-display text-3xl leading-none text-foreground">Task</h1>
           </div>
-          <button
-            onClick={toggleAutoSpeak}
-            className={cn(
-              "ml-1 p-2 rounded-full transition-all duration-300",
-              autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-            )}
-            title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
-          >
-            {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-          </button>
         </div>
 
         <nav className="flex-1 flex flex-col gap-2">
           {NAV_ITEMS.map((item) => {
             const isActive = location === item.href;
             return (
-              <Link 
-                key={item.href} 
+              <Link
+                key={item.href}
                 href={item.href}
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group",
-                  isActive 
-                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/10" 
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md shadow-primary/10"
                     : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 )}
               >
@@ -74,22 +64,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* Desktop Instruction Card */}
-        <div className="mt-auto pt-6 border-t border-border/50">
-          <div className="bg-muted/30 rounded-2xl p-4 border border-border/30">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Mẫu câu lệnh</h4>
-            <div className="space-y-3 text-xs">
-              <div className="flex flex-col gap-1">
-                <span className="font-bold text-primary/80">Nhập liệu:</span>
-                <span className="text-muted-foreground italic leading-relaxed">"Tạo mặt hàng Khoai tây lắc giá 45k"</span>
-                <span className="text-muted-foreground italic leading-relaxed">"Lên đơn chị Thanh - 2 khoai tây lắc - 582 trần lãm"</span>
+        {/* User section */}
+        <div className="mt-auto pt-6 border-t border-border/50 space-y-3">
+          <button
+            onClick={toggleAutoSpeak}
+            className={cn(
+              "flex items-center gap-2 w-full px-3 py-2 rounded-xl text-xs font-medium transition-all",
+              autoSpeak ? "bg-accent/10 text-accent" : "bg-secondary text-muted-foreground"
+            )}>
+            {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {autoSpeak ? "Tự động đọc: BẬT" : "Tự động đọc: TẮT"}
+          </button>
+
+          {user && (
+            <div className="flex items-center justify-between px-2">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
+                  {user.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="text-xs">
+                  <p className="font-semibold text-foreground truncate max-w-[140px]">{user.name}</p>
+                  <p className="text-muted-foreground truncate max-w-[140px]">{user.email}</p>
+                </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="font-bold text-primary/80">Chốt đơn:</span>
-                <span className="text-muted-foreground italic leading-relaxed">"Chốt đơn chị Thanh trần lãm"</span>
-              </div>
+              <button onClick={logout} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Đăng xuất">
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </aside>
 
@@ -99,30 +101,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <header className="md:hidden flex items-center justify-between p-4 bg-background/80 backdrop-blur-md sticky top-0 z-40 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg overflow-hidden shadow-md">
-              <img src="/icon-512.png" alt="SÓI Agent" className="w-full h-full object-cover" />
+              <img src="/icon-512.png" alt="SÓI" className="w-full h-full object-cover" />
             </div>
             <div className="flex items-center gap-1.5">
               <div className="flex items-baseline gap-1">
                 <h1 className="font-display text-xl leading-none text-sky-500">SÓI</h1>
-                <h1 className="font-display text-xl leading-none text-foreground">Agent</h1>
+                <h1 className="font-display text-xl leading-none text-foreground">Task</h1>
               </div>
-              <button
-                onClick={toggleAutoSpeak}
-                className={cn(
-                  "p-1.5 rounded-full transition-all duration-300",
-                  autoSpeak ? "bg-accent/10 text-accent hover:bg-accent/20" : "bg-secondary text-muted-foreground hover:bg-secondary/80"
-                )}
-                title={autoSpeak ? "Tắt tự động đọc" : "Bật tự động đọc"}
-              >
-                {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-              </button>
             </div>
           </div>
           <div className="relative">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-xl hover:bg-secondary transition-colors"
-            >
+            <button onClick={() => setMenuOpen(!menuOpen)} className="p-2 rounded-xl hover:bg-secondary transition-colors">
               <Menu className="w-6 h-6" />
             </button>
             {menuOpen && (
@@ -132,32 +121,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {NAV_ITEMS.map((item) => {
                     const isActive = location === item.href;
                     return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={cn(
-                          "flex items-center gap-3 px-4 py-3 text-sm transition-colors",
-                          isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-                        )}
-                      >
-                        <item.icon className="w-5 h-5" />
-                        <span>{item.label}</span>
+                      <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}
+                        className={cn("flex items-center gap-3 px-4 py-3 text-sm transition-colors",
+                          isActive ? "text-primary font-semibold" : "text-muted-foreground hover:text-foreground")}>
+                        <item.icon className="w-5 h-5" /><span>{item.label}</span>
                       </Link>
                     );
                   })}
+                  <div className="border-t border-border mt-1 pt-1">
+                    <button onClick={logout}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground hover:text-destructive w-full transition-colors">
+                      <LogOut className="w-5 h-5" /><span>Đăng xuất</span>
+                    </button>
+                  </div>
                 </div>
               </>
             )}
           </div>
         </header>
 
-        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-8 max-w-5xl mx-auto w-full" style={{ maxHeight: '100%' }}>
+        <div className="flex-1 min-h-0 overflow-hidden flex flex-col p-4 md:p-8 max-w-5xl mx-auto w-full" style={{ maxHeight: "100%" }}>
           {children}
         </div>
       </main>
-
-      
     </div>
   );
 }

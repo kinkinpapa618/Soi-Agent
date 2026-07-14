@@ -65,7 +65,7 @@ export function registerAIRoutes(app: Express, storage: IStorage, chatStorage: I
         apiKeys: z.record(z.string()).optional(),
       }).parse(req.body);
 
-      const result = await agent.process(input);
+      const result = await agent.process({ ...input, userId: (req as any).user?.id || 0 });
       res.json(result);
     } catch (err) {
       console.error(err);

@@ -1,0 +1,191 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, CheckCircle2, Circle, Trash2, Calendar, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const PRIORITY_COLORS: Record<string, string> = {
+  urgent: "text-red-500 bg-red-500/10",
+  high: "text-orange-500 bg-orange-500/10",
+  medium: "text-blue-500 bg-blue-500/10",
+  low: "text-gray-400 bg-gray-500/10",
+};
+
+const PRIORITY_LABELS: Record<string, string> = {
+  urgent: "Khẩn",
+  high: "Cao",
+  medium: "Vừa",
+  low: "Thấp",
+};
+
+const STATUS_TABS = [
+  { key: "", label: "Tất cả" },
+  { key: "pending", label: "Chưa làm" },
+  { key: "in_progress", label: "Đang làm" },
+  { key: "completed", label: "Đã xong" },
+];
+
+export default function Tasks() {
+  const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [showInput, setShowInput] = useState(false);
+
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: ["tasks", statusFilter],
+    queryFn: async () => {
+      const params = statusFilter ? `?status=${statusFilter}` : "";
+      const res = await fetch(`/api/tasks${params}`);
+      if (!res.ok) throw new Error("Failed to fetch tasks");
+      return res.json();
+    },
+  });
+
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/categories");
+      if (!res.ok) throw new Error("Failed to fetch categories");
+      return res.json();
+    },
+  });
+
+  const createTask = useMutation({
+    mutationFn: async (title: string) => {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (!res.ok) throw new Error("Failed to create task");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      setNewTitle("");
+      setShowInput(false);
+    },
+  });
+
+  const completeTask = useMutation({
+    mutationFn: async (id: number) => {
+      await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const deleteTask = useMutation({
+    mutationFn: async (id: number) => {
+      await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+    createTask.mutate(newTitle.trim());
+  };
+
+  const getCategory = (catId: number | null) => categories.find((c: any) => c.id === catId);
+
+  return (
+    <div className="flex-1 flex flex-col min-h-0 max-h-full">
+      <div className="flex items-center justify-between mb-4 md:mb-6 shrink-0">
+        <h2 className="text-xl md:text-2xl font-display font-bold">Công việc</h2>
+        <button
+          onClick={() => setShowInput(!showInput)}
+          className="flex items-center gap-2 bg-primary text-primary-foreground rounded-xl px-4 py-2 text-sm font-semibold hover:shadow-lg transition-all"
+        >
+          <Plus className="w-4 h-4" /> Thêm
+        </button>
+      </div>
+
+      {showInput && (
+        <form onSubmit={handleCreate} className="mb-4 shrink-0">
+          <div className="flex gap-2">
+            <input
+              autoFocus
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              placeholder="Nhập tên công việc..."
+              className="flex-1 bg-card border border-border rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
+            />
+            <button type="submit" disabled={!newTitle.trim()}
+              className="bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50">
+              Tạo
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="flex gap-2 mb-4 overflow-x-auto shrink-0">
+        {STATUS_TABS.map((tab) => (
+          <button key={tab.key}
+            onClick={() => setStatusFilter(tab.key)}
+            className={cn(
+              "px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all",
+              statusFilter === tab.key ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+            )}>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-2">
+        {isLoading ? (
+          <div className="text-center text-muted-foreground py-8">Đang tải...</div>
+        ) : tasks.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            <div className="text-4xl mb-2">📋</div>
+            <p className="text-sm">Chưa có công việc nào</p>
+            <p className="text-xs mt-1">Dùng chat AI để tạo nhanh bằng giọng nói</p>
+          </div>
+        ) : (
+          tasks.map((task: any) => {
+            const cat = getCategory(task.categoryId);
+            const isDone = task.status === "completed";
+            return (
+              <div key={task.id}
+                className={cn(
+                  "flex items-start gap-3 bg-card border border-border rounded-xl p-3 md:p-4 transition-all group hover:shadow-sm",
+                  isDone && "opacity-60"
+                )}>
+                <button onClick={() => completeTask.mutate(task.id)}
+                  className="flex-shrink-0 mt-0.5 text-muted-foreground hover:text-primary transition-colors">
+                  {isDone ? <CheckCircle2 className="w-5 h-5 text-primary" /> : <Circle className="w-5 h-5" />}
+                </button>
+
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm font-medium", isDone && "line-through text-muted-foreground")}>
+                    {task.title}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span className={cn("text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase", PRIORITY_COLORS[task.priority] || "")}>
+                      {PRIORITY_LABELS[task.priority] || task.priority}
+                    </span>
+                    {cat && (
+                      <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground">
+                        {cat.icon} {cat.name}
+                      </span>
+                    )}
+                    {task.dueDate && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date(task.dueDate).toLocaleDateString("vi-VN")}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <button onClick={() => deleteTask.mutate(task.id)}
+                  className="flex-shrink-0 p-1 rounded-lg text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

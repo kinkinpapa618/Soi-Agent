@@ -22,10 +22,6 @@ const httpServer = createServer(app);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-app.get("/health", (_req, res) => {
-  res.json({ status: "ok", db: !!process.env.DATABASE_URL });
-});
-
 (async () => {
   try {
     await registerRoutes(httpServer, app);

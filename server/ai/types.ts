@@ -12,6 +12,7 @@ export interface ChatRequest {
   model?: string;
   history?: { role: "user" | "assistant"; content: string }[];
   apiKeys?: Record<string, string>;
+  userId: number;
 }
 
 export interface ChatResponse {
@@ -21,14 +22,9 @@ export interface ChatResponse {
 }
 
 export interface AgentContext {
-  products: unknown[];
-  pendingOrders: unknown[];
-  allOrders: unknown[];
+  tasks: { id: number; title: string; status: string; priority: string; dueDate: string | null; categoryId: number | null }[];
+  categories: { id: number; name: string; color: string }[];
   memories: { summary: string }[];
   customInstructions: { trigger: string; instruction: string; example: string | null }[];
-  todayStats: {
-    totalOrders: number;
-    completedOrders: number;
-    revenue: number;
-  };
+  dailyStats: { total: number; completed: number; pending: number };
 }

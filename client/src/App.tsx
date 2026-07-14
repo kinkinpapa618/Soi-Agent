@@ -1,29 +1,54 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import { useAuth } from "@/hooks/use-auth";
 
 import { Layout } from "@/components/Layout";
 import Home from "@/pages/Home";
-import Products from "@/pages/Products";
-import Orders from "@/pages/Orders";
-import Reports from "@/pages/Reports";
+import Tasks from "@/pages/Tasks";
 import Settings from "@/pages/Settings";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-background">
+        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Redirect to="/login" />;
+  }
+
+  return <>{children}</>;
+}
 
 function Router() {
   return (
-    <Layout>
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/products" component={Products} />
-        <Route path="/orders" component={Orders} />
-        <Route path="/reports" component={Reports} />
-        <Route path="/settings" component={Settings} />
-        <Route component={NotFound} />
-      </Switch>
-    </Layout>
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route>
+        <AuthGuard>
+          <Layout>
+            <Switch>
+              <Route path="/" component={Home} />
+              <Route path="/tasks" component={Tasks} />
+              <Route path="/settings" component={Settings} />
+              <Route component={NotFound} />
+            </Switch>
+          </Layout>
+        </AuthGuard>
+      </Route>
+    </Switch>
   );
 }
 
