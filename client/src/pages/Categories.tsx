@@ -115,24 +115,25 @@ export default function Categories() {
 
       {/* Create Form */}
       {showForm && (
-        <form onSubmit={handleCreate} className="mb-5 shrink-0 bg-card border border-border rounded-2xl p-4 space-y-3">
-          <h3 className="text-sm font-semibold">Tạo danh mục mới</h3>
-          <div className="flex gap-3">
+        <div className="mb-5 shrink-0 bg-card border border-border rounded-2xl p-4">
+          <h3 className="text-sm font-semibold mb-3">Tạo danh mục mới</h3>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-xs text-muted-foreground w-12">Icon & Màu</span>
             <div className="relative">
               <button type="button"
                 onClick={() => setShowColorPicker(showColorPicker === "new" ? null : "new")}
-                className="w-11 h-11 rounded-xl flex items-center justify-center text-lg border-2 border-border hover:border-primary transition-colors"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border-2 border-border hover:border-primary transition-colors"
                 style={{ backgroundColor: newColor + "20", borderColor: newColor }}
               >
                 {newIcon}
               </button>
               {showColorPicker === "new" && (
-                <div className="absolute top-full mt-2 left-0 bg-card border border-border rounded-xl p-3 shadow-xl z-30 w-52">
+                <div className="absolute top-full mt-2 left-0 bg-card border border-border rounded-xl p-3 shadow-xl z-30 w-56">
                   <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2">Icon</p>
-                  <div className="flex flex-wrap gap-1.5 mb-3">
+                  <div className="flex flex-wrap gap-1.5 mb-3 max-h-24 overflow-y-auto">
                     {ICON_OPTIONS.map(ico => (
                       <button key={ico} type="button"
-                        onClick={() => { setNewIcon(ico); setShowColorPicker(null); }}
+                        onClick={() => setNewIcon(ico)}
                         className={cn("w-8 h-8 rounded-lg flex items-center justify-center text-sm hover:bg-secondary transition-colors",
                           newIcon === ico && "bg-secondary ring-2 ring-primary")}
                       >{ico}</button>
@@ -142,15 +143,17 @@ export default function Categories() {
                   <div className="flex flex-wrap gap-2">
                     {COLOR_PALETTE.map(c => (
                       <button key={c} type="button"
-                        onClick={() => { setNewColor(c); setShowColorPicker(null); }}
+                        onClick={() => setNewColor(c)}
                         className="w-7 h-7 rounded-full border-2 transition-all hover:scale-110"
-                        style={{ backgroundColor: c, borderColor: newColor === c ? "#fff" : "transparent", boxShadow: newColor === c ? "0 0 0 2px " + c : "none" }}
+                        style={{ backgroundColor: c, borderColor: newColor === c ? "#fff" : "transparent", boxShadow: newColor === c ? `0 0 0 2px ${c}` : "none" }}
                       />
                     ))}
                   </div>
                 </div>
               )}
             </div>
+          </div>
+          <form onSubmit={handleCreate} className="flex gap-2">
             <input
               autoFocus
               value={newName}
@@ -159,11 +162,15 @@ export default function Categories() {
               className="flex-1 bg-secondary rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20"
             />
             <button type="submit" disabled={!newName.trim() || createCategory.isPending}
-              className="bg-primary text-primary-foreground rounded-xl px-4 py-2.5 text-sm font-semibold disabled:opacity-50 hover:shadow-md transition-all">
+              className="bg-primary text-primary-foreground rounded-xl px-5 py-2.5 text-sm font-semibold disabled:opacity-50 hover:shadow-md transition-all shrink-0">
               Tạo
             </button>
-          </div>
-        </form>
+            <button type="button" onClick={() => setShowForm(false)}
+              className="p-2.5 rounded-xl text-muted-foreground hover:bg-secondary transition-colors shrink-0">
+              <X className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
       )}
 
       {/* Categories List */}
