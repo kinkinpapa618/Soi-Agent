@@ -6,7 +6,7 @@ services:
     plan: free
     region: singapore
     buildCommand: npm install; npm run build; npx drizzle-kit migrate
-    startCommand: node dist/index.cjs
+    startCommand: npx drizzle-kit migrate; node dist/index.cjs
     healthCheckPath: /health
     envVarGroups:
       - name: soi-agent
