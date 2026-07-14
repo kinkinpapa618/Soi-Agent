@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const MONTHS = "Thg 1,Thg 2,Thg 3,Thg 4,Thg 5,Thg 6,Thg 7,Thg 8,Thg 9,Thg 10,Thg 11,Thg 12".split(",");
@@ -25,8 +25,8 @@ function getStartDay(year: number, month: number) {
 export default function MiniCalendar() {
   const now = new Date();
   const [location, navigate] = useLocation();
-  const urlParams = new URLSearchParams(window.location.search);
-  const dateParam = urlParams.get("date");
+  const searchString = useSearch();
+  const dateParam = new URLSearchParams(searchString).get("date");
 
   const selectedDate = dateParam ? new Date(dateParam) : null;
   const initialYear = selectedDate ? selectedDate.getFullYear() : now.getFullYear();
@@ -99,36 +99,36 @@ export default function MiniCalendar() {
   return (
     <div className="px-1 py-2">
       {/* Month nav */}
-      <div className="flex items-center justify-between mb-2">
-        <button onClick={prevMonth} className="p-0.5 hover:bg-white/10 rounded transition-colors">
-          <ChevronLeft className="w-3.5 h-3.5 text-white/50" />
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={prevMonth} className="p-1 hover:bg-white/10 rounded transition-colors">
+          <ChevronLeft className="w-4 h-4 text-white/50" />
         </button>
-        <span className="text-xs font-semibold text-white/80">{MONTHS[month]} {year}</span>
-        <button onClick={nextMonth} className="p-0.5 hover:bg-white/10 rounded transition-colors">
-          <ChevronRight className="w-3.5 h-3.5 text-white/50" />
+        <span className="text-sm font-bold text-white/90">{MONTHS[month]} {year}</span>
+        <button onClick={nextMonth} className="p-1 hover:bg-white/10 rounded transition-colors">
+          <ChevronRight className="w-4 h-4 text-white/50" />
         </button>
       </div>
 
       {/* Day headers */}
-      <div className="grid grid-cols-7 text-center mb-1">
+      <div className="grid grid-cols-7 text-center mb-1.5">
         {DAYS.map(d => (
-          <div key={d} className="text-[9px] text-white/30 font-medium py-0.5">{d}</div>
+          <div key={d} className="text-[11px] text-white/35 font-semibold py-1">{d}</div>
         ))}
       </div>
 
       {/* Days grid */}
-      <div className="grid grid-cols-7 text-center gap-y-0.5">
+      <div className="grid grid-cols-7 text-center gap-y-1">
         {cells.map((c, i) => (
           <div key={i} className="flex justify-center">
             <button
               onClick={() => !c.faded && selectDate(c.date)}
               disabled={c.faded}
               style={{
-                width: 26, height: 26, fontSize: 11, fontWeight: c.isToday ? 600 : 400,
+                width: 30, height: 30, fontSize: 13, fontWeight: c.isToday ? 700 : 500,
                 borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
                 cursor: c.faded ? "default" : "pointer", border: "none",
                 background: c.isSelected ? "#e91e63" : "transparent",
-                color: c.faded ? "rgba(255,255,255,0.15)" : c.isSelected ? "#fff" : c.isToday ? "#ffb74d" : "rgba(255,255,255,0.7)",
+                color: c.faded ? "rgba(255,255,255,0.12)" : c.isSelected ? "#fff" : c.isToday ? "#ffb74d" : "rgba(255,255,255,0.75)",
                 position: "relative",
                 transition: "0.15s",
                 opacity: c.faded ? 0.3 : 1,
@@ -136,7 +136,7 @@ export default function MiniCalendar() {
             >
               {c.day}
               {c.hasTask && !c.isSelected && (
-                <div style={{ position: "absolute", bottom: 2, width: 3, height: 3, borderRadius: "50%", background: "#e91e63" }} />
+                <div style={{ position: "absolute", bottom: 3, width: 4, height: 4, borderRadius: "50%", background: "#e91e63" }} />
               )}
             </button>
           </div>
@@ -146,7 +146,7 @@ export default function MiniCalendar() {
       {/* Today button */}
       <button
         onClick={goToday}
-        className="w-full mt-2 text-[10px] text-white/50 hover:text-white transition-colors py-1 rounded-lg hover:bg-white/5"
+        className="w-full mt-3 text-[11px] text-white/50 hover:text-white transition-colors py-1.5 rounded-lg hover:bg-white/5"
       >
         Hôm nay
       </button>

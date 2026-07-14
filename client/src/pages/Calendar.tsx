@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { ArrowLeft } from "lucide-react";
 
 const DAYS = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
@@ -20,8 +20,8 @@ function isSameDay(a: Date, b: Date) {
 function daysBetween(a: Date, b: Date) { return Math.round((b.getTime() - a.getTime()) / 86400000) + 1; }
 
 export default function Calendar() {
-  const urlParams = new URLSearchParams(window.location.search);
-  const dateParam = urlParams.get("date");
+  const searchString = useSearch();
+  const dateParam = new URLSearchParams(searchString).get("date");
   const selectedDate = dateParam ? new Date(dateParam) : null;
 
   const { data: tasks = [] } = useQuery({
