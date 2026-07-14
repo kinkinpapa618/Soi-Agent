@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, CheckSquare, Menu, Volume2, VolumeX, Settings, LogOut } from "lucide-react";
+import { MessageSquare, CheckSquare, Calendar, Menu, Volume2, VolumeX, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 
 const NAV_ITEMS = [
   { href: "/", label: "Trợ Lý AI", icon: MessageSquare },
   { href: "/tasks", label: "Công việc", icon: CheckSquare },
+  { href: "/calendar", label: "Lịch", icon: Calendar },
   { href: "/settings", label: "Cài đặt", icon: Settings },
 ];
 

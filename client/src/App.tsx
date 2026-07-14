@@ -10,6 +10,7 @@ import { Layout } from "@/components/Layout";
 import Home from "@/pages/Home";
 import Tasks from "@/pages/Tasks";
 import TaskDetail from "@/pages/TaskDetail";
+import Calendar from "@/pages/Calendar";
 import Settings from "@/pages/Settings";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -44,6 +45,7 @@ function Router() {
               <Route path="/" component={Home} />
               <Route path="/tasks" component={Tasks} />
               <Route path="/tasks/:id" component={TaskDetail} />
+              <Route path="/calendar" component={Calendar} />
               <Route path="/settings" component={Settings} />
               <Route component={NotFound} />
             </Switch>

@@ -46,9 +46,10 @@ export const tasks = pgTable("tasks", {
   userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
-  status: text("status").default("pending").notNull(), // pending | in_progress | completed | cancelled
-  priority: text("priority").default("medium").notNull(), // low | medium | high | urgent
+  status: text("status").default("pending").notNull(),
+  priority: text("priority").default("medium").notNull(),
   categoryId: integer("category_id").references(() => categories.id, { onDelete: "set null" }),
+  startDate: timestamp("start_date", { withTimezone: true }),
   dueDate: timestamp("due_date", { withTimezone: true }),
   reminderAt: timestamp("reminder_at", { withTimezone: true }),
   parentId: integer("parent_id"),

@@ -56,6 +56,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const input = z.object({
         title: z.string().min(1),
         description: z.string().optional(),
+        startDate: z.string().optional(),
         dueDate: z.string().optional(),
         priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
         categoryId: z.number().optional(),
@@ -66,6 +67,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const task = await storage.createTask(user.id, {
         title: input.title,
         description: input.description || null,
+        startDate: input.startDate ? new Date(input.startDate) : null,
         dueDate: input.dueDate ? new Date(input.dueDate) : null,
         priority: input.priority || "medium",
         categoryId: input.categoryId || null,
@@ -87,6 +89,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const input = z.object({
         title: z.string().optional(),
         description: z.string().nullable().optional(),
+        startDate: z.string().nullable().optional(),
         dueDate: z.string().nullable().optional(),
         priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
         status: z.enum(["pending", "in_progress", "completed", "cancelled"]).optional(),
@@ -98,6 +101,7 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
       const updates: Record<string, unknown> = {};
       if (input.title !== undefined) updates.title = input.title;
       if (input.description !== undefined) updates.description = input.description;
+      if (input.startDate !== undefined) updates.startDate = input.startDate ? new Date(input.startDate) : null;
       if (input.dueDate !== undefined) updates.dueDate = input.dueDate ? new Date(input.dueDate) : null;
       if (input.priority !== undefined) updates.priority = input.priority;
       if (input.status !== undefined) updates.status = input.status;
