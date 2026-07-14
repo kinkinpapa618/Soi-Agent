@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { MessageSquare, CheckSquare, Calendar, Menu, Volume2, VolumeX, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import MiniCalendar from "@/components/MiniCalendar";
 
 const NAV_ITEMS = [
   { href: "/", label: "Trợ Lý AI", icon: MessageSquare },
@@ -33,45 +34,52 @@ export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-dvh min-h-dvh overflow-hidden bg-background flex flex-col md:flex-row">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex w-72 flex-col border-r border-border bg-card/50 backdrop-blur-xl sticky top-0 h-screen p-6">
-        <div className="flex items-center gap-3 px-2 mb-12">
+      <aside className="hidden md:flex w-72 flex-col border-r border-white/[0.06] bg-[#0f1729] h-screen p-6">
+        {/* Logo */}
+        <div className="flex items-center gap-3 px-2 mb-10">
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-sky-500/30">
             <img src="/icon-512.png" alt="SÓI Task" className="w-full h-full object-cover" />
           </div>
           <div className="flex items-baseline gap-1">
             <h1 className="font-display text-3xl leading-none text-sky-500">SÓI</h1>
-            <h1 className="font-display text-3xl leading-none text-foreground">Task</h1>
+            <h1 className="font-display text-3xl leading-none text-white">Task</h1>
           </div>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-2">
+        {/* Nav */}
+        <nav className="flex flex-col gap-1.5">
           {NAV_ITEMS.map((item) => {
-            const isActive = location === item.href;
+            const isActive = location === item.href || (item.href === "/calendar" && location.startsWith("/calendar"));
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group",
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-300 group",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/10"
-                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    : "text-white/50 hover:bg-white/[0.06] hover:text-white/80"
                 )}
               >
                 <item.icon className={cn("w-5 h-5 transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
-                <span className="font-sans font-semibold">{item.label}</span>
+                <span className="font-sans font-semibold text-sm">{item.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* User section */}
-        <div className="mt-auto pt-6 border-t border-border/50 space-y-3">
+        {/* Mini Calendar - below nav */}
+        <div className="mt-4 pt-4 border-t border-white/[0.06]">
+          <MiniCalendar />
+        </div>
+
+        {/* User section - at bottom */}
+        <div className="mt-auto pt-4 border-t border-white/[0.06] space-y-3">
           <button
             onClick={toggleAutoSpeak}
             className={cn(
               "flex items-center gap-2 w-full px-3 py-2 rounded-xl text-xs font-medium transition-all",
-              autoSpeak ? "bg-accent/10 text-accent" : "bg-secondary text-muted-foreground"
+              autoSpeak ? "bg-sky-500/20 text-sky-400" : "bg-white/[0.04] text-white/40"
             )}>
             {autoSpeak ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             {autoSpeak ? "Tự động đọc: BẬT" : "Tự động đọc: TẮT"}
@@ -80,15 +88,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {user && (
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
+                <div className="w-8 h-8 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 text-sm font-bold">
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-xs">
-                  <p className="font-semibold text-foreground truncate max-w-[140px]">{user.name}</p>
-                  <p className="text-muted-foreground truncate max-w-[140px]">{user.email}</p>
+                  <p className="font-semibold text-white truncate max-w-[120px]">{user.name}</p>
+                  <p className="text-white/30 truncate max-w-[120px]">{user.email}</p>
                 </div>
               </div>
-              <button onClick={logout} className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors" title="Đăng xuất">
+              <button onClick={logout} className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors" title="Đăng xuất">
                 <LogOut className="w-4 h-4" />
               </button>
             </div>
