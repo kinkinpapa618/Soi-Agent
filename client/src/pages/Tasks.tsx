@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, CheckCircle2, Circle, Trash2, Calendar, Clock, Pause } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { useNotificationContext } from "@/hooks/notification-context";
 
 const PRIORITY_COLORS: Record<string, string> = {
   urgent: "text-red-500 bg-red-500/10",
@@ -37,6 +38,7 @@ export default function Tasks() {
   const [statusFilter, setStatusFilter] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [showInput, setShowInput] = useState(false);
+  const { notify } = useNotificationContext();
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ["tasks", statusFilter],
@@ -67,18 +69,24 @@ export default function Tasks() {
       if (!res.ok) throw new Error("Failed to create task");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setNewTitle("");
       setShowInput(false);
+      notify({ type: "created", taskId: data.id, title: data.title });
     },
   });
 
   const completeTask = useMutation({
     mutationFn: async (id: number) => {
-      await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+      const res = await fetch(`/api/tasks/${id}/complete`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      notify({ type: "status_change", taskId: data.id, title: data.title, newStatus: "completed" });
+    },
   });
 
   const deleteTask = useMutation({

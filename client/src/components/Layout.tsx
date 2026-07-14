@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
-import { MessageSquare, CheckSquare, Calendar, Menu, Volume2, VolumeX, Settings, LogOut } from "lucide-react";
+import { MessageSquare, CheckSquare, Calendar, Menu, Volume2, VolumeX, Settings, LogOut, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { useNotificationContext } from "@/hooks/notification-context";
 import MiniCalendar from "@/components/MiniCalendar";
 
 const NAV_ITEMS = [
@@ -17,6 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(() => localStorage.getItem("soi_autospeak") !== "false");
   const { user, logout } = useAuth();
+  const { permission, requestPermission, unreadCount } = useNotificationContext();
 
   useEffect(() => {
     const handler = () => setAutoSpeak(localStorage.getItem("soi_autospeak") !== "false");
@@ -36,7 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar - Desktop */}
       <aside className="hidden md:flex w-72 flex-col border-r border-white/[0.06] bg-[#0f1729] h-screen p-6">
         {/* Logo */}
-        <div className="flex items-center gap-3 px-2 mb-10">
+        <div className="flex items-center gap-3 px-2 mb-6">
           <div className="w-12 h-12 rounded-xl overflow-hidden shadow-lg shadow-sky-500/30">
             <img src="/icon-512.png" alt="SÓI Task" className="w-full h-full object-cover" />
           </div>
@@ -44,6 +46,29 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <h1 className="font-display text-3xl leading-none text-sky-500">SÓI</h1>
             <h1 className="font-display text-3xl leading-none text-white">Task</h1>
           </div>
+        </div>
+
+        {/* Notification Bell */}
+        <div className="px-2 mb-4">
+          {permission !== "granted" ? (
+            <button
+              onClick={requestPermission}
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-xs font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
+            >
+              <Bell className="w-4 h-4" />
+              Bật thông báo
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium text-white/40">
+              <Bell className="w-4 h-4" />
+              Thông báo
+              {unreadCount > 0 && (
+                <span className="ml-auto bg-pink-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center leading-none">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Nav */}

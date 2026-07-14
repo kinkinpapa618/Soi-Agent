@@ -3,6 +3,7 @@ import { useRoute, useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Circle, Pencil, Trash2, RotateCcw, Save, X, Calendar, Clock, AlertTriangle, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNotificationContext } from "@/hooks/notification-context";
 
 const PRIORITY_COLORS: Record<string, string> = {
   urgent: "text-red-500 bg-red-500/10 border-red-500/20",
@@ -39,6 +40,7 @@ export default function TaskDetail() {
   const queryClient = useQueryClient();
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<any>({});
+  const { notify } = useNotificationContext();
 
   const { data: task, isLoading } = useQuery({
     queryKey: ["task", params?.id],
@@ -69,20 +71,26 @@ export default function TaskDetail() {
       if (!res.ok) throw new Error("Failed to update");
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["task", params?.id] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       setEditMode(false);
+      if (data.status && data.status !== task.status) {
+        notify({ type: "status_change", taskId: data.id, title: data.title, newStatus: data.status });
+      }
     },
   });
 
   const completeTask = useMutation({
     mutationFn: async () => {
-      await fetch(`/api/tasks/${params?.id}/complete`, { method: "POST" });
+      const res = await fetch(`/api/tasks/${params?.id}/complete`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["task", params?.id] });
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      notify({ type: "status_change", taskId: data.id, title: data.title, newStatus: "completed" });
     },
   });
 
