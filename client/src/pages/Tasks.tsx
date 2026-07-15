@@ -20,10 +20,10 @@ const PRIORITY_LABELS: Record<string, string> = {
 };
 
 const STATUS_BG: Record<string, string> = {
-  pending: "bg-amber-50 border-amber-200/50",
-  in_progress: "bg-blue-50 border-blue-200/50",
-  completed: "bg-emerald-50 border-emerald-200/50",
-  cancelled: "bg-red-50 border-red-200/50",
+  pending: "bg-amber-100 border-amber-300/60",
+  in_progress: "bg-blue-100 border-blue-300/60",
+  completed: "bg-emerald-100 border-emerald-300/60",
+  cancelled: "bg-red-100 border-red-300/60",
 };
 
 const STATUS_TABS = [

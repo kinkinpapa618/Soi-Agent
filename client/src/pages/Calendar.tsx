@@ -8,6 +8,13 @@ const DAYS_SHORT = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
 const MONTHS = "Tháng 1,Tháng 2,Tháng 3,Tháng 4,Tháng 5,Tháng 6,Tháng 7,Tháng 8,Tháng 9,Tháng 10,Tháng 11,Tháng 12".split(",");
 const COLORS = ["#e91e63", "#ff9800", "#4caf50", "#2196f3", "#9c27b0", "#00bcd4", "#ff5722", "#3f51b5", "#009688", "#8bc34a", "#ff6347", "#607d8b"];
 
+const STATUS_BG: Record<string, string> = {
+  pending: "bg-amber-100 border-amber-300/60",
+  in_progress: "bg-blue-100 border-blue-300/60",
+  completed: "bg-emerald-100 border-emerald-300/60",
+  cancelled: "bg-red-100 border-red-300/60",
+};
+
 function colorForId(id: number) { return COLORS[(id * 7 + 3) % COLORS.length]; }
 function isBetweenDays(day: Date, start: Date, end: Date) {
   const d = new Date(day.getFullYear(), day.getMonth(), day.getDate());
@@ -269,7 +276,7 @@ export default function Calendar() {
 
             return (
               <Link key={task.id} href={`/tasks/${task.id}`}
-                className="block bg-card border border-border rounded-xl p-4 transition-all hover:shadow-md hover:border-primary/20 group">
+                className={`block ${STATUS_BG[task.status] || "bg-card border-border"} rounded-xl p-4 transition-all hover:shadow-md hover:border-primary/20 group`}>
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0 flex flex-col items-center gap-0">
                     <div style={{
